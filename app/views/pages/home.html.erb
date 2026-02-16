@@ -36,19 +36,19 @@
 </section>
 
 <%# ── WORLD GLOBE ── %>
-<section class="section section--map">
+<section class="section section--tight section--map">
   <div class="container">
     <h2 class="section-title">L'action climatique dans le monde</h2>
     <p class="section-subtitle">Faites tourner le globe. Cliquez sur un pays pour voir sa fiche.</p>
 
     <div class="map-legend map-legend--centered">
       <div class="map-legend-items">
-        <div class="map-legend-item"><span class="map-legend-color" style="background: #2D9D3A;"></span><span>A</span></div>
-        <div class="map-legend-item"><span class="map-legend-color" style="background: #7BBF2A;"></span><span>B</span></div>
-        <div class="map-legend-item"><span class="map-legend-color" style="background: #F5C542;"></span><span>C</span></div>
-        <div class="map-legend-item"><span class="map-legend-color" style="background: #E8822A;"></span><span>D</span></div>
-        <div class="map-legend-item"><span class="map-legend-color" style="background: #C62828;"></span><span>E</span></div>
-        <div class="map-legend-item"><span class="map-legend-color" style="background: #E2E4E8;"></span><span>Non évalué</span></div>
+        <div class="map-legend-item"><span class="map-legend-color" style="background: #1B813E;"></span><span>A</span></div>
+        <div class="map-legend-item"><span class="map-legend-color" style="background: #5BA829;"></span><span>B</span></div>
+        <div class="map-legend-item"><span class="map-legend-color" style="background: #E8B50A;"></span><span>C</span></div>
+        <div class="map-legend-item"><span class="map-legend-color" style="background: #D46A16;"></span><span>D</span></div>
+        <div class="map-legend-item"><span class="map-legend-color" style="background: #B91C1C;"></span><span>E</span></div>
+        <div class="map-legend-item"><span class="map-legend-color" style="background: #D1D5DB;"></span><span>Non évalué</span></div>
       </div>
     </div>
 
@@ -57,14 +57,14 @@
       <div id="globe-tooltip" class="map-tooltip"></div>
     </div>
 
-    <div class="section-cta">
+    <div class="section-cta" style="margin-top: var(--space-md);">
       <%= link_to "Explorer la carte complète →", carte_path, class: "btn btn--outline" %>
     </div>
   </div>
 </section>
 
 <%# ── HOW IT WORKS ── %>
-<section class="section section--how">
+<section class="section section--tight section--how">
   <div class="container">
     <h2 class="section-title">Comment ça marche</h2>
 
@@ -104,7 +104,7 @@
 </section>
 
 <%# ── GRADE SYSTEM ── %>
-<section class="section section--grades">
+<section class="section section--tight section--grades">
   <div class="container">
     <h2 class="section-title">Un score clair, comme le Nutri-Score</h2>
     <p class="section-subtitle">De A à E, chaque voyage reçoit une note globale transparente.</p>
@@ -120,43 +120,46 @@
   </div>
 </section>
 
-<%# ── TOP COUNTRIES ── %>
-<section class="section section--countries">
+<%# ── TOP COUNTRIES (avec photos) ── %>
+<section class="section section--tight section--countries">
   <div class="container">
     <h2 class="section-title">Les pays les mieux notés</h2>
     <p class="section-subtitle">Classement basé sur l'action climatique réelle, pas les promesses.</p>
 
-    <div class="countries-grid">
+    <div class="countries-grid countries-grid--photo">
       <% @top_countries.each_with_index do |country, index| %>
-        <%= link_to country_path(country), class: "country-card" do %>
-          <div class="country-card-header">
-            <span class="country-rank">#<%= index + 1 %></span>
-            <span class="country-flag"><%= country.flag_emoji %></span>
-            <span class="country-grade" style="background-color: <%= country.grade_color %>;">
-              <%= country.grade %>
-            </span>
-          </div>
-          <h3 class="country-name"><%= country.name_fr %></h3>
-          <div class="country-score-bar">
-            <div class="country-score-fill" style="width: <%= country.climate_score %>%; background-color: <%= country.cat_color %>;">
+        <%= link_to country_path(country), class: "country-photo-card" do %>
+          <div class="country-photo-card-img"
+               style="background-image: url('https://source.unsplash.com/600x400/?<%= country.name.parameterize %>+landscape');">
+            <div class="country-photo-card-overlay">
+              <div class="country-photo-card-top">
+                <span class="country-photo-rank">#<%= index + 1 %></span>
+                <span class="country-photo-grade" style="background-color: <%= country.grade_color %>;">
+                  <%= country.grade %>
+                </span>
+              </div>
+              <div class="country-photo-card-bottom">
+                <span class="country-photo-flag"><%= country.flag_emoji %></span>
+                <h3 class="country-photo-name"><%= country.name_fr %></h3>
+                <div class="country-photo-meta">
+                  <span class="country-photo-cat"><%= country.cat_label %></span>
+                  <span class="country-photo-score"><%= country.climate_score %>/100</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="country-meta">
-            <span class="country-cat"><%= country.cat_label %></span>
-            <span class="country-score"><%= country.climate_score %>/100</span>
           </div>
         <% end %>
       <% end %>
     </div>
 
-    <div class="section-cta">
+    <div class="section-cta" style="margin-top: var(--space-lg);">
       <%= link_to "Voir tous les pays →", countries_path, class: "btn btn--outline" %>
     </div>
   </div>
 </section>
 
 <%# ── CTA ── %>
-<section class="section section--cta">
+<section class="section section--cta section--cta-compact">
   <div class="container">
     <h2>Prêt à voyager autrement ?</h2>
     <p>Évaluez votre prochain voyage en 30 secondes.</p>
@@ -169,11 +172,20 @@
   window.countriesData = <%= raw @countries_data %>;
 </script>
 
-<%# ── GLOBE SCRIPT ── %>
+<%# ── GLOBE SCRIPT (couleurs plus vives) ── %>
 <script>
 (function() {
   if (window._globeHomeInitialized) return;
   window._globeHomeInitialized = true;
+
+  /* Couleurs plus saturées pour le globe */
+  var gradeColorMap = {
+    "#2D9D3A": "#1B813E",
+    "#7BBF2A": "#5BA829",
+    "#F5C542": "#E8B50A",
+    "#E8822A": "#D46A16",
+    "#C62828": "#B91C1C"
+  };
 
   var isoNumericToAlpha3 = {
     "004":"AFG","008":"ALB","012":"DZA","020":"AND","024":"AGO","028":"ATG",
@@ -220,10 +232,10 @@
 
     function getColor(isoAlpha3) {
       var c = countryLookup[isoAlpha3];
-      return c ? c.grade_color : "#E2E4E8";
+      if (!c) return "#D1D5DB";
+      return gradeColorMap[c.grade_color] || c.grade_color;
     }
 
-    /* Use viewBox so the SVG scales with CSS width */
     var vb = 550;
     var sensitivity = 75;
     var currentRotation = [0, -20];
@@ -236,7 +248,7 @@
       .attr("preserveAspectRatio", "xMidYMid meet");
 
     var projection = d3.geoOrthographic()
-      .scale(vb / 2.2)
+      .scale(vb / 2.15)
       .center([0, 0])
       .rotate(currentRotation)
       .translate([vb / 2, vb / 2]);
@@ -244,13 +256,13 @@
     var path = d3.geoPath().projection(projection);
     var tooltip = document.getElementById("globe-tooltip");
 
-    /* Ocean */
+    /* Ocean — bleu plus profond */
     svg.append("circle")
       .attr("cx", vb / 2).attr("cy", vb / 2)
       .attr("r", projection.scale())
-      .attr("fill", "#E8F4FD")
-      .attr("stroke", "#CBD5E1")
-      .attr("stroke-width", 1);
+      .attr("fill", "#BFDBFE")
+      .attr("stroke", "#93C5FD")
+      .attr("stroke-width", 1.5);
 
     /* Graticule */
     var graticule = d3.geoGraticule();
@@ -258,9 +270,9 @@
       .datum(graticule)
       .attr("d", path)
       .attr("fill", "none")
-      .attr("stroke", "#CBD5E1")
+      .attr("stroke", "#93C5FD")
       .attr("stroke-width", 0.3)
-      .attr("stroke-opacity", 0.5);
+      .attr("stroke-opacity", 0.4);
 
     /* Drag */
     var drag = d3.drag()
@@ -278,7 +290,6 @@
 
     svg.call(drag);
 
-    /* Countries */
     var countriesPaths;
 
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(function(world) {
@@ -292,7 +303,7 @@
         .attr("d", path)
         .attr("fill", function(d) { return getColor(isoNumericToAlpha3[d.id]); })
         .attr("stroke", "#fff")
-        .attr("stroke-width", 0.4)
+        .attr("stroke-width", 0.5)
         .style("cursor", function(d) { return countryLookup[isoNumericToAlpha3[d.id]] ? "pointer" : "default"; })
         .on("mouseover", function(event, d) {
           var alpha3 = isoNumericToAlpha3[d.id];
@@ -319,7 +330,7 @@
           tooltip.style.top = (event.clientY - rect.top - 10) + "px";
         })
         .on("mouseout", function() {
-          d3.select(this).attr("stroke", "#fff").attr("stroke-width", 0.4);
+          d3.select(this).attr("stroke", "#fff").attr("stroke-width", 0.5);
           tooltip.style.display = "none";
           setTimeout(function() { autoRotate = true; }, 1500);
         })
@@ -329,7 +340,6 @@
           if (c) window.location.href = c.path;
         });
 
-      /* Auto-rotation */
       d3.timer(function() {
         if (!document.getElementById("globe-home")) return true;
         if (autoRotate) {
