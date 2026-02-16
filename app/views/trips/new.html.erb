@@ -4,7 +4,7 @@
   <div class="container">
     <h1>Évaluez votre voyage</h1>
     <p class="page-subtitle">
-      Renseignez votre trajet et découvrez son score climatique en temps réel.
+      Renseignez votre trajet et découvrez son score climatique.
     </p>
   </div>
 </section>
@@ -13,118 +13,95 @@
   <div class="container">
     <div class="trip-calculator">
 
-      <%# ── FORM ── %>
+      <%# ── FORM PANEL ── %>
       <div class="trip-form-panel">
-        <%= form_with model: @trip, url: trips_path, class: "trip-form", data: { controller: "trip-scorer" } do |f| %>
+        <%= form_with model: @trip, url: trips_path, class: "trip-form" do |f| %>
 
+          <% if @trip.errors.any? %>
+            <div class="form-errors">
+              <strong><%= @trip.errors.count %> erreur(s) empêchent le calcul :</strong>
+              <ul>
+                <% @trip.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <%# ── Départ ── %>
           <div class="form-section">
             <h3>🏠 Votre point de départ</h3>
-
             <div class="form-group">
               <%= f.label :origin_city, "Ville de départ" %>
               <%= f.text_field :origin_city,
                   placeholder: "ex: Nancy, Paris, Lyon...",
                   class: "form-input",
-                  required: true,
-                  data: { trip_scorer_target: "originCity", action: "change->trip-scorer#calculate" } %>
+                  required: true %>
             </div>
           </div>
 
+          <%# ── Destination ── %>
           <div class="form-section">
             <h3>🌍 Votre destination</h3>
-
             <div class="form-group">
               <%= f.label :country_id, "Pays" %>
               <%= f.collection_select :country_id, @countries, :id, :name_fr,
                   { prompt: "Choisir un pays..." },
-                  { class: "form-input form-select",
-                    required: true,
-                    data: { trip_scorer_target: "country", action: "change->trip-scorer#calculate" } } %>
-            </div>
-
-            <div class="form-group">
-              <%= f.label :destination_id, "Ville (optionnel)" %>
-              <%= f.collection_select :destination_id, [], :id, :name,
-                  { prompt: "Choisir une ville..." },
-                  { class: "form-input form-select",
-                    data: { trip_scorer_target: "destination" } } %>
+                  { class: "form-input form-select", required: true } %>
             </div>
           </div>
 
+          <%# ── Transport ── %>
           <div class="form-section">
             <h3>🚂 Mode de transport</h3>
 
-            <div class="transport-options">
-              <% @transport_modes.each do |mode| %>
-                <label class="transport-option" data-co2="<%= mode.co2_per_km %>">
-                  <%= f.radio_button :transport_mode_id, mode.id,
-                      data: { trip_scorer_target: "transport", action: "change->trip-scorer#calculate" } %>
-                  <div class="transport-option-content">
-                    <span class="transport-icon"><%= mode.icon %></span>
-                    <span class="transport-name"><%= mode.name_fr %></span>
-                    <span class="transport-co2"><%= (mode.co2_per_km * 1000).round(0) %> g CO₂/km</span>
-                  </div>
-                </label>
-              <% end %>
-            </div>
+            <% if @transport_modes.any? %>
+              <div class="transport-options">
+                <% @transport_modes.each do |mode| %>
+                  <label class="transport-option">
+                    <%= f.radio_button :transport_mode_id, mode.id %>
+                    <div class="transport-option-content">
+                      <span class="transport-icon"><%= mode.icon || "🚀" %></span>
+                      <span class="transport-name"><%= mode.name_fr || mode.name %></span>
+                      <span class="transport-co2"><%= (mode.co2_per_km * 1000).round(0) %> g CO₂/km</span>
+                    </div>
+                  </label>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="form-hint" style="color: var(--red);">
+                ⚠️ Aucun mode de transport configuré.
+                Lancez <code>rails db:seed</code> pour initialiser les données.
+              </p>
+            <% end %>
           </div>
 
+          <%# ── Détails ── %>
           <div class="form-section">
             <h3>📅 Détails du séjour</h3>
 
             <div class="form-row">
-              <div class="form-group form-group--half">
+              <div class="form-group">
                 <%= f.label :duration_days, "Durée (jours)" %>
-                <%= f.number_field :duration_days,
-                    min: 1, max: 365, value: 7,
-                    class: "form-input",
-                    data: { trip_scorer_target: "duration", action: "change->trip-scorer#calculate" } %>
+                <%= f.number_field :duration_days, min: 1, max: 365, class: "form-input" %>
               </div>
-
-              <div class="form-group form-group--half">
+              <div class="form-group">
                 <%= f.label :travelers_count, "Voyageurs" %>
-                <%= f.number_field :travelers_count,
-                    min: 1, max: 20, value: 1,
-                    class: "form-input" %>
+                <%= f.number_field :travelers_count, min: 1, max: 20, class: "form-input" %>
               </div>
             </div>
 
             <div class="form-row">
-              <div class="form-group form-group--half">
+              <div class="form-group">
                 <%= f.label :departure_date, "Date de départ" %>
                 <%= f.date_field :departure_date, class: "form-input" %>
               </div>
-              <div class="form-group form-group--half">
+              <div class="form-group">
                 <%= f.label :return_date, "Date de retour" %>
                 <%= f.date_field :return_date, class: "form-input" %>
               </div>
             </div>
           </div>
-
-          <% if user_signed_in? %>
-            <div class="form-section">
-              <h3>⚖️ Vos priorités</h3>
-              <p class="form-hint">Ajustez l'importance de chaque pilier dans votre score.</p>
-
-              <div class="weight-sliders">
-                <div class="weight-slider">
-                  <label>🌍 Climat pays : <span data-trip-scorer-target="climateWeightDisplay">30</span>%</label>
-                  <input type="range" name="trip[climate_weight]" min="0" max="100" value="30" step="5"
-                         data-trip-scorer-target="climateWeight" data-action="input->trip-scorer#adjustWeights">
-                </div>
-                <div class="weight-slider">
-                  <label>🚂 Transport : <span data-trip-scorer-target="transportWeightDisplay">40</span>%</label>
-                  <input type="range" name="trip[transport_weight]" min="0" max="100" value="40" step="5"
-                         data-trip-scorer-target="transportWeight" data-action="input->trip-scorer#adjustWeights">
-                </div>
-                <div class="weight-slider">
-                  <label>🤝 Impact local : <span data-trip-scorer-target="localWeightDisplay">30</span>%</label>
-                  <input type="range" name="trip[local_impact_weight]" min="0" max="100" value="30" step="5"
-                         data-trip-scorer-target="localWeight" data-action="input->trip-scorer#adjustWeights">
-                </div>
-              </div>
-            </div>
-          <% end %>
 
           <div class="form-actions">
             <%= f.submit "Calculer mon score", class: "btn btn--primary btn--lg btn--full" %>
@@ -133,12 +110,12 @@
         <% end %>
       </div>
 
-      <%# ── LIVE SCORE PREVIEW ── %>
-      <div class="trip-score-panel" data-trip-scorer-target="scorePanel">
+      <%# ── SCORE PREVIEW PANEL ── %>
+      <div class="trip-score-panel">
         <div class="score-preview">
           <div class="score-preview-placeholder">
             <span class="score-preview-icon">🌡️</span>
-            <p>Renseignez votre voyage pour voir votre score en temps réel.</p>
+            <p>Renseignez votre voyage pour voir votre score.</p>
           </div>
         </div>
       </div>

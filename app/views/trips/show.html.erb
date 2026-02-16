@@ -1,4 +1,189 @@
-<div>
-  <h1 class="font-bold text-4xl">Trips#show</h1>
-  <p>Find me in app/views/trips/show.html.erb</p>
-</div>
+<% content_for(:title) { "Score voyage — #{@trip.country.name_fr}" } %>
+
+<%
+  grade_info = Trip::GRADES[@trip.grade] || Trip::GRADES["C"]
+  grade_color = grade_info[:color]
+%>
+
+<section class="section section--page-header">
+  <div class="container">
+    <div class="trip-result-header">
+      <div>
+        <p class="trip-result-route">
+          <%= @trip.origin_city || "Départ" %> → <%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %>
+        </p>
+        <h1>Résultat de votre voyage</h1>
+      </div>
+      <div class="trip-result-grade">
+        <div class="grade-badge-lg" style="background-color: <%= grade_color %>;">
+          <%= @trip.grade %>
+        </div>
+        <span class="grade-score"><%= grade_info[:label] %></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="country-layout">
+
+      <%# ── Main column ── %>
+      <div class="country-main">
+
+        <%# ── Overall score ── %>
+        <div class="detail-card">
+          <h2>Score global : <%= @trip.overall_score&.round(0) %>/100</h2>
+          <p class="country-description"><%= grade_info[:description] %></p>
+
+          <div class="trip-score-breakdown">
+            <div class="stat-row">
+              <span>🌍 Climat pays</span>
+              <div class="score-bar-md">
+                <div class="score-fill-md" style="width: <%= @trip.climate_country_score || 0 %>%; background-color: <%= grade_color %>;"></div>
+              </div>
+              <strong><%= @trip.climate_country_score&.round(0) %>/100</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>🚂 Transport</span>
+              <div class="score-bar-md">
+                <div class="score-fill-md" style="width: <%= @trip.transport_score || 0 %>%; background-color: <%= grade_color %>;"></div>
+              </div>
+              <strong><%= @trip.transport_score&.round(0) %>/100</strong>
+            </div>
+
+            <div class="stat-row">
+              <span>🤝 Impact local</span>
+              <div class="score-bar-md">
+                <div class="score-fill-md" style="width: <%= @trip.local_impact_score || 0 %>%; background-color: <%= grade_color %>;"></div>
+              </div>
+              <strong><%= @trip.local_impact_score&.round(0) %>/100</strong>
+            </div>
+          </div>
+        </div>
+
+        <%# ── CO2 Details ── %>
+        <div class="detail-card">
+          <h2>Empreinte carbone</h2>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">CO₂ transport (A/R)</span>
+              <span class="stat-value"><%= @trip.co2_transport_kg&.round(0) || "—" %> <small>kg</small></span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">CO₂ hébergement</span>
+              <span class="stat-value"><%= @trip.co2_accommodation_kg&.round(0) || "—" %> <small>kg</small></span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">CO₂ total</span>
+              <span class="stat-value"><%= @trip.co2_total_kg&.round(0) || "—" %> <small>kg</small></span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">CO₂ par jour</span>
+              <span class="stat-value"><%= @trip.co2_per_day_kg&.round(1) || "—" %> <small>kg/j</small></span>
+            </div>
+          </div>
+
+          <% if @trip.distance_km.present? %>
+            <div class="stat-row">
+              <span>Distance estimée (vol d'oiseau)</span>
+              <strong><%= number_with_delimiter(@trip.distance_km.round(0)) %> km</strong>
+            </div>
+          <% end %>
+
+          <% if @trip.co2_total_kg.present? %>
+            <div class="stat-row">
+              <span>Budget carbone voyage annuel (1.5°C)</span>
+              <strong>600 kg</strong>
+            </div>
+            <div class="stat-row">
+              <span>Part consommée par ce voyage</span>
+              <strong class="<%= @trip.co2_total_kg > 600 ? 'stat-trend--bad' : 'stat-trend--good' %>">
+                <%= (@trip.co2_total_kg / 600.0 * 100).round(0) %>%
+              </strong>
+            </div>
+          <% end %>
+        </div>
+
+        <%# ── Recommendations ── %>
+        <% if @recommendations.present? && @recommendations.any? %>
+          <div class="detail-card">
+            <h2>Recommandations</h2>
+            <div class="recommendations-list">
+              <% @recommendations.each do |tip| %>
+                <div class="recommendation-item recommendation-item--<%= tip['priority'] %>">
+                  <div class="recommendation-content">
+                    <p><%= tip['message'] %></p>
+                    <% if tip['potential_improvement'].present? %>
+                      <span class="recommendation-impact"><%= tip['potential_improvement'] %></span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+
+      <%# ── Sidebar ── %>
+      <div class="country-sidebar">
+
+        <div class="sidebar-card">
+          <h3>Détails du voyage</h3>
+          <div class="trip-details-list">
+            <div class="stat-row">
+              <span>Départ</span>
+              <strong><%= @trip.origin_city || "—" %></strong>
+            </div>
+            <div class="stat-row">
+              <span>Destination</span>
+              <strong><%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %></strong>
+            </div>
+            <div class="stat-row">
+              <span>Transport</span>
+              <strong><%= @trip.transport_mode&.icon %> <%= @trip.transport_mode&.name_fr || @trip.transport_mode&.name %></strong>
+            </div>
+            <div class="stat-row">
+              <span>Durée</span>
+              <strong><%= @trip.duration_days %> jours</strong>
+            </div>
+            <div class="stat-row">
+              <span>Voyageurs</span>
+              <strong><%= @trip.travelers_count || 1 %></strong>
+            </div>
+            <% if @trip.departure_date.present? %>
+              <div class="stat-row">
+                <span>Dates</span>
+                <strong><%= l(@trip.departure_date, format: :short) rescue @trip.departure_date %></strong>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>Fiche pays</h3>
+          <div class="stat-row">
+            <span>Score climat</span>
+            <strong><%= @trip.country.climate_score %>/100</strong>
+          </div>
+          <div class="stat-row">
+            <span>Grade</span>
+            <span class="grade-badge-sm" style="background-color: <%= @trip.country.grade_color %>;">
+              <%= @trip.country.grade %>
+            </span>
+          </div>
+          <%= link_to "Voir la fiche complète →", country_path(@trip.country), class: "btn btn--outline btn--full", style: "margin-top: var(--space-md);" %>
+        </div>
+
+        <div class="sidebar-card sidebar-card--cta">
+          <p>Ce n'est pas le résultat espéré ?</p>
+          <%= link_to "Essayer un autre voyage", new_trip_path, class: "btn btn--primary" %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>

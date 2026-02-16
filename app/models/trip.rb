@@ -1,3 +1,4 @@
+# app/models/trip.rb
 class Trip < ApplicationRecord
   GRADES = {
     "A" => { label: "Excellent",     color: "#2D9D3A", min: 80, description: "Ce voyage est aligné avec l'objectif 1.5°C" },
@@ -9,10 +10,6 @@ class Trip < ApplicationRecord
 
   belongs_to :user
   belongs_to :destination, optional: true
-  belongs_to :country
-  belongs_to :transport_mode
-  belongs_to :user
-  belongs_to :destination
   belongs_to :country
   belongs_to :transport_mode
 end

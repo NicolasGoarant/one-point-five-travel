@@ -15,7 +15,7 @@
 
     <div class="navbar-links" id="navbar-links">
       <%= link_to "Explorer les pays", countries_path, class: "nav-link" %>
-      <%= link_to "Évaluer un voyage", new_trip_path, class: "nav-link nav-link--cta" %>
+      <%= link_to "Évaluer un voyage", new_trip_path, class: "nav-link" %>
       <%= link_to "Méthodologie", methodology_path, class: "nav-link" %>
       <%= link_to "Pourquoi 1.5°", pourquoi_path, class: "nav-link" %>
       <%= link_to "Carte", carte_path, class: "nav-link" %>
@@ -27,39 +27,55 @@
         <%= link_to "Connexion", new_user_session_path, class: "nav-link" %>
       <% end %>
     </div>
+
+    <%# ── Mobile overlay ── %>
+    <div class="navbar-overlay" id="navbar-overlay"></div>
   </div>
 </nav>
 
 <script>
-  (function() {
-    // Éviter les listeners multiples
-    if (window._burgerInitialized) return;
-    window._burgerInitialized = true;
+(function() {
+  if (window._burgerInitialized) return;
+  window._burgerInitialized = true;
 
-    document.addEventListener("turbo:load", function() {
-      const burger = document.getElementById("navbar-burger");
-      const links = document.getElementById("navbar-links");
-      if (!burger || !links) return;
+  document.addEventListener("turbo:load", function() {
+    var burger  = document.getElementById("navbar-burger");
+    var links   = document.getElementById("navbar-links");
+    var overlay = document.getElementById("navbar-overlay");
+    if (!burger || !links) return;
 
-      // Cloner le burger pour supprimer les anciens listeners
-      const newBurger = burger.cloneNode(true);
-      burger.parentNode.replaceChild(newBurger, burger);
+    var fresh = burger.cloneNode(true);
+    burger.parentNode.replaceChild(fresh, burger);
 
-      newBurger.addEventListener("click", function() {
-        newBurger.classList.toggle("is-active");
-        links.classList.toggle("is-open");
-      });
-
-      links.querySelectorAll(".nav-link").forEach(function(link) {
-        link.addEventListener("click", function() {
-          newBurger.classList.remove("is-active");
-          links.classList.remove("is-open");
-        });
-      });
-
-      // Fermer le menu lors de la navigation
+    function closeMenu() {
+      fresh.classList.remove("is-active");
       links.classList.remove("is-open");
-      newBurger.classList.remove("is-active");
+      if (overlay) overlay.classList.remove("is-visible");
+      document.body.style.overflow = "";
+    }
+
+    function openMenu() {
+      fresh.classList.add("is-active");
+      links.classList.add("is-open");
+      if (overlay) overlay.classList.add("is-visible");
+      document.body.style.overflow = "hidden";
+    }
+
+    fresh.addEventListener("click", function() {
+      if (links.classList.contains("is-open")) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     });
-  })();
+
+    if (overlay) overlay.addEventListener("click", closeMenu);
+
+    links.querySelectorAll(".nav-link").forEach(function(link) {
+      link.addEventListener("click", closeMenu);
+    });
+
+    closeMenu();
+  });
+})();
 </script>

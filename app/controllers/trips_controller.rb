@@ -1,5 +1,5 @@
 class TripsController < ApplicationController
-  before_action :authenticate_user!, except: [:new, :create]
+  before_action :authenticate_user!, except: [:new, :create, :show]
 
   def index
     @trips = current_user.trips.order(created_at: :desc).includes(:country, :transport_mode)
@@ -7,45 +7,53 @@ class TripsController < ApplicationController
 
   def show
     @trip = Trip.find(params[:id])
+    @grade_info = Trip::GRADES[@trip.grade] || Trip::GRADES["C"]
+    @recommendations = begin
+      JSON.parse(@trip.recommendations || "[]")
+    rescue JSON::ParserError
+      []
+    end
   end
 
   def new
-    @trip = Trip.new
-    @countries = Country.where.not(climate_score: nil).order(climate_score: :desc)
-    @transport_modes = TransportMode.where(active: true).order(:co2_per_km)
+    @trip = Trip.new(duration_days: 7, travelers_count: 1)
+    load_form_data
   end
 
   def create
     @trip = Trip.new(trip_params)
 
+    # ── Assign user ──
     if user_signed_in?
       @trip.user = current_user
     else
-      @trip.user = User.new(
-        email: "preview_#{SecureRandom.hex(8)}@temp.local",
-        password: SecureRandom.hex(16),
-        climate_weight: 30, transport_weight: 40, local_impact_weight: 30
+      @trip.user = User.create!(
+        email: "guest_#{SecureRandom.hex(8)}@temp.local",
+        password: SecureRandom.hex(16)
       )
     end
 
+    # ── Calculate distance if missing ──
     if @trip.distance_km.blank? && @trip.country.present?
       @trip.distance_km = DistanceCalculator.estimate(
         origin_lat: @trip.origin_latitude || 48.6937,
         origin_lng: @trip.origin_longitude || 6.1834,
-        dest_lat: @trip.country.latitude,
-        dest_lng: @trip.country.longitude
+        dest_lat:   @trip.country.latitude,
+        dest_lng:   @trip.country.longitude
       )
     end
 
-    result = TripScoringService.new(@trip).call
-    @trip.assign_attributes(result)
-    @trip.status = "calculated"
+    # ── Score the trip (only if we have enough data) ──
+    if @trip.country.present? && @trip.transport_mode.present?
+      result = TripScoringService.new(@trip).call
+      @trip.assign_attributes(result)
+      @trip.status = "calculated"
+    end
 
     if @trip.save
       redirect_to trip_path(@trip), notice: "Votre score voyage a été calculé !"
     else
-      @countries = Country.where.not(climate_score: nil).order(climate_score: :desc)
-      @transport_modes = TransportMode.where(active: true).order(:co2_per_km)
+      load_form_data
       render :new, status: :unprocessable_entity
     end
   end
@@ -57,6 +65,11 @@ class TripsController < ApplicationController
   end
 
   private
+
+  def load_form_data
+    @countries = Country.where.not(climate_score: nil).order(:name_fr)
+    @transport_modes = TransportMode.order(:co2_per_km)
+  end
 
   def trip_params
     params.require(:trip).permit(

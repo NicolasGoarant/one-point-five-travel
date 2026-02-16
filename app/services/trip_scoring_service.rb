@@ -4,13 +4,13 @@
 # Calculates a trip's overall sustainability score based on three pillars:
 #
 #   1. Climate Country Score (Pilier Climat Pays)
-#      → How aligned is the destination country with the Paris Agreement?
+#      -> How aligned is the destination country with the Paris Agreement?
 #
 #   2. Transport Score (Pilier Empreinte Trajet)
-#      → How much CO2 does the journey emit?
+#      -> How much CO2 does the journey emit?
 #
 #   3. Local Impact Score (Pilier Impact Local)
-#      → Does tourism benefit or harm local communities?
+#      -> Does tourism benefit or harm local communities?
 #
 # Each pillar is scored 0-100, then weighted according to user preferences.
 # The aggregate produces a grade A-E (inspired by Nutri-Score).
@@ -21,8 +21,8 @@ class TripScoringService
   ANNUAL_TRAVEL_CO2_BUDGET_KG = 600
 
   # Reference distances for transport scoring
-  EXCELLENT_CO2_PER_DAY = 5    # kg CO2/day — train travel in Europe
-  TERRIBLE_CO2_PER_DAY  = 200  # kg CO2/day — long-haul flight, short stay
+  EXCELLENT_CO2_PER_DAY = 5    # kg CO2/day - train travel in Europe
+  TERRIBLE_CO2_PER_DAY  = 200  # kg CO2/day - long-haul flight, short stay
 
   def initialize(trip)
     @trip = trip
@@ -58,26 +58,20 @@ class TripScoringService
 
   private
 
-  # ─── PILLAR 1: CLIMATE COUNTRY SCORE ───────────────────────────────
+  # --- PILLAR 1: CLIMATE COUNTRY SCORE ---
 
   def calculate_climate_score
     return 0 unless @country
-
-    # Use the pre-computed country climate score (0-100)
-    # This aggregates CAT rating, CCPI, emissions/capita, renewables, trend
     @country.climate_score || 0
   end
 
-  # ─── PILLAR 2: TRANSPORT SCORE ─────────────────────────────────────
+  # --- PILLAR 2: TRANSPORT SCORE ---
 
   def calculate_transport_score
     return 50 unless @transport && @trip.distance_km&.positive?
 
-    # Score based on CO2 per day of travel (not just total CO2)
-    # This rewards longer stays that "amortize" the transport carbon
     daily_co2 = co2_per_day
 
-    # Logarithmic scale: excellent (5 kg/day) = 100, terrible (200 kg/day) = 0
     if daily_co2 <= EXCELLENT_CO2_PER_DAY
       100.0
     elsif daily_co2 >= TERRIBLE_CO2_PER_DAY
@@ -90,34 +84,29 @@ class TripScoringService
     end
   end
 
-  # ─── PILLAR 3: LOCAL IMPACT SCORE ──────────────────────────────────
+  # --- PILLAR 3: LOCAL IMPACT SCORE ---
 
   def calculate_local_impact_score
     scores = []
 
-    # Country-level tourism GDP contribution
     if @country&.tourism_gdp_pct
-      # Sweet spot: 5-15% of GDP = tourism is important but not overwhelming
       tourism_score = case @country.tourism_gdp_pct
-                      when 0..2    then 30  # Tourism too marginal to benefit from travelers
-                      when 2..5    then 60  # Growing sector
-                      when 5..15   then 90  # Healthy tourism economy
-                      when 15..30  then 60  # High dependency
-                      else              30  # Over-dependency
+                      when 0..2    then 30
+                      when 2..5    then 60
+                      when 5..15   then 90
+                      when 15..30  then 60
+                      else              30
                       end
       scores << tourism_score
     end
 
-    # Protected areas — more protection = better biodiversity stewardship
     if @country&.protected_areas_pct
       scores << [@country.protected_areas_pct.to_f * 3, 100].min
     end
 
-    # Destination-level factors
     if @trip.destination
       dest = @trip.destination
 
-      # Tourism pressure penalty
       pressure_score = case dest.tourism_pressure
                        when "low"         then 100
                        when "moderate"    then 75
@@ -127,10 +116,8 @@ class TripScoringService
                        end
       scores << pressure_score
 
-      # Train accessibility bonus
       scores << (dest.accessible_by_train ? 80 : 50)
 
-      # Eco certifications
       if dest.eco_certifications_count&.positive?
         scores << [dest.eco_certifications_count * 20, 100].min
       end
@@ -140,13 +127,13 @@ class TripScoringService
     (scores.sum.to_f / scores.size).round(1)
   end
 
-  # ─── OVERALL SCORE & GRADE ─────────────────────────────────────────
+  # --- OVERALL SCORE & GRADE ---
 
   def calculate_overall_score(climate, transport, local)
     w = weights
     (
-      climate   * w[:climate]   / 100.0 +
-      transport * w[:transport] / 100.0 +
+      climate   * w[:climate]      / 100.0 +
+      transport * w[:transport]    / 100.0 +
       local     * w[:local_impact] / 100.0
     ).round(1)
   end
@@ -162,19 +149,18 @@ class TripScoringService
   end
 
   def weights
-    @weights ||= if @user
+    @weights ||= if @user&.respond_to?(:scoring_weights) && @user.scoring_weights.present?
                    @user.scoring_weights
                  else
                    { climate: 30, transport: 40, local_impact: 30 }
                  end
   end
 
-  # ─── CO2 CALCULATIONS ─────────────────────────────────────────────
+  # --- CO2 CALCULATIONS ---
 
   def co2_transport
     @co2_transport ||= if @transport && @trip.distance_km&.positive?
-                          # Round trip
-                          @transport.calculate_co2(@trip.distance_km) * 2
+                          @transport.co2_per_km * @trip.distance_km * 2
                         else
                           0
                         end
@@ -182,9 +168,6 @@ class TripScoringService
 
   def co2_accommodation
     @co2_accommodation ||= begin
-      # Average hotel: ~20 kg CO2/night (ADEME)
-      # Eco-lodge: ~5 kg CO2/night
-      # This is a rough estimate to be refined with real data
       nights = (@trip.duration_days || 1)
       base_rate = @trip.destination&.eco_certifications_count&.positive? ? 8 : 20
       nights * base_rate
@@ -199,12 +182,11 @@ class TripScoringService
     end
   end
 
-  # ─── RECOMMENDATIONS ───────────────────────────────────────────────
+  # --- RECOMMENDATIONS ---
 
   def generate_recommendations(climate_score, transport_score, local_score)
     tips = []
 
-    # Transport recommendations
     if transport_score < 50 && @transport&.name == "plane"
       if @trip.distance_km && @trip.distance_km < 800
         tips << {
@@ -219,11 +201,10 @@ class TripScoringService
         type: "transport",
         priority: "medium",
         message: "Un séjour plus long réduirait l'impact quotidien du vol.",
-        potential_improvement: "+#{((co2_transport / ((@trip.duration_days || 1) + 3)) - co2_per_day).abs.round(0)} kg CO₂/jour en restant 3 jours de plus"
+        potential_improvement: "+#{((co2_transport / ((@trip.duration_days || 1) + 3)) - co2_per_day).abs.round(0)} kg CO2/jour en restant 3 jours de plus"
       }
     end
 
-    # Climate country recommendations
     if climate_score < 40
       tips << {
         type: "climate",
@@ -233,7 +214,6 @@ class TripScoringService
       }
     end
 
-    # Local impact recommendations
     if local_score < 50 && @trip.destination&.tourism_pressure == "overtourism"
       tips << {
         type: "local_impact",
@@ -243,12 +223,11 @@ class TripScoringService
       }
     end
 
-    # Duration bonus reminder
     if (@trip.duration_days || 0) < 4 && @transport&.name == "plane"
       tips << {
         type: "duration",
         priority: "medium",
-        message: "Un voyage de moins de 4 jours en avion a un ratio CO₂/jour très défavorable.",
+        message: "Un voyage de moins de 4 jours en avion a un ratio CO2/jour très défavorable.",
         potential_improvement: "Doublez la durée pour diviser l'impact quotidien par deux"
       }
     end

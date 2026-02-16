@@ -445,3 +445,29 @@ Country.ranked_by_climate.limit(5).each_with_index do |c, i|
   puts "    #{i + 1}. #{c.flag_emoji} #{c.name_fr.ljust(20)} #{c.climate_score}/100 (#{c.cat_label})"
 end
 puts ""
+
+
+# Coller ce code dans db/seeds.rb ou lancer avec: rails runner db/seed_transport_modes.rb
+#
+# Crée les modes de transport avec les facteurs d'émission ADEME Base Empreinte
+
+puts "🚂 Seeding transport modes..."
+
+modes = [
+  { name: "train",         name_fr: "Train",               icon: "🚄", co2_per_km: 0.006,  active: true },
+  { name: "bus",           name_fr: "Bus / Car",           icon: "🚌", co2_per_km: 0.030,  active: true },
+  { name: "electric_car",  name_fr: "Voiture électrique",  icon: "⚡", co2_per_km: 0.020,  active: true },
+  { name: "car",           name_fr: "Voiture",             icon: "🚗", co2_per_km: 0.110,  active: true },
+  { name: "ferry",         name_fr: "Ferry",               icon: "⛴️",  co2_per_km: 0.120,  active: true },
+  { name: "plane_short",   name_fr: "Avion court-courrier",icon: "✈️",  co2_per_km: 0.230,  active: true },
+  { name: "plane",         name_fr: "Avion long-courrier", icon: "🛫", co2_per_km: 0.190,  active: true }
+]
+
+modes.each do |attrs|
+  mode = TransportMode.find_or_initialize_by(name: attrs[:name])
+  mode.assign_attributes(attrs)
+  mode.save!
+  puts "  ✅ #{mode.name_fr} — #{(mode.co2_per_km * 1000).round(0)} g CO₂/km"
+end
+
+puts "✅ #{TransportMode.count} transport modes ready."

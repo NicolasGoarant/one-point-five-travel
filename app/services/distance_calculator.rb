@@ -6,6 +6,12 @@
 class DistanceCalculator
   EARTH_RADIUS_KM = 6371.0
 
+  # Named-parameter interface used by TripsController
+  def self.estimate(origin_lat:, origin_lng:, dest_lat:, dest_lng:)
+    return nil if [origin_lat, origin_lng, dest_lat, dest_lng].any?(&:nil?)
+    haversine(origin_lat, origin_lng, dest_lat, dest_lng)
+  end
+
   # Returns distance in kilometers between two lat/lng pairs
   def self.haversine(lat1, lon1, lat2, lon2)
     lat1_rad = to_radians(lat1)
