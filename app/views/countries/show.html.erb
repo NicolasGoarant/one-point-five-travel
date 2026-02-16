@@ -1,0 +1,147 @@
+<% content_for(:title) { @country.name_fr } %>
+
+<section class="section section--page-header">
+  <div class="container">
+    <div class="country-header">
+      <span class="country-header-flag"><%= @country.flag_emoji %></span>
+      <div>
+        <h1><%= @country.name_fr %></h1>
+        <p class="page-subtitle"><%= @country.continent&.tr("_", " ") %> · <%= @country.capital %></p>
+      </div>
+      <div class="country-header-grade">
+        <span class="grade-badge-lg" style="background-color: <%= @country.grade_color %>;">
+          <%= @country.grade %>
+        </span>
+        <span class="grade-score"><%= @country.climate_score&.round(1) %>/100</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="country-layout">
+
+      <%# ── LEFT: DETAILS ── %>
+      <div class="country-main">
+
+        <%# Climate Profile %>
+        <div class="detail-card">
+          <h2>Profil climatique</h2>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Note CAT</span>
+              <span class="stat-value" style="color: <%= @country.cat_color %>;">
+                <%= @country.cat_label %>
+              </span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Émissions/hab</span>
+              <span class="stat-value"><%= @country.emissions_per_capita&.round(1) || "—" %> <small>t CO₂</small></span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Renouvelables</span>
+              <span class="stat-value"><%= @country.renewable_energy_pct || "—" %><small>%</small></span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Accord de Paris</span>
+              <span class="stat-value"><%= @country.paris_status_label %></span>
+            </div>
+          </div>
+
+          <% if @country.ccpi_score.present? %>
+            <div class="stat-row">
+              <span>Score CCPI Germanwatch</span>
+              <div class="score-bar-md">
+                <div class="score-fill-md" style="width: <%= @country.ccpi_score %>%; background-color: <%= @country.grade_color %>;"></div>
+              </div>
+              <span><%= @country.ccpi_score.round(1) %>/100</span>
+            </div>
+          <% end %>
+
+          <% if @country.emissions_trend_pct.present? %>
+            <div class="stat-row">
+              <span>Tendance émissions</span>
+              <span class="stat-trend <%= @country.emissions_trend_pct <= 0 ? 'stat-trend--good' : 'stat-trend--bad' %>">
+                <%= @country.emissions_trend_pct > 0 ? "+" : "" %><%= @country.emissions_trend_pct.round(1) %>%
+              </span>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Description %>
+        <% if @country.description_fr.present? %>
+          <div class="detail-card">
+            <h2>À propos</h2>
+            <p class="country-description"><%= @country.description_fr %></p>
+          </div>
+        <% end %>
+
+        <%# NDC Summary %>
+        <% if @country.ndc_summary.present? %>
+          <div class="detail-card">
+            <h2>Engagements nationaux (NDC)</h2>
+            <p class="country-description"><%= @country.ndc_summary %></p>
+          </div>
+        <% end %>
+
+        <%# Destinations %>
+        <% if @destinations.any? %>
+          <div class="detail-card">
+            <h2>Destinations</h2>
+            <div class="destinations-list">
+              <% @destinations.each do |dest| %>
+                <div class="destination-item">
+                  <h3><%= dest.name %></h3>
+                  <% if dest.respond_to?(:tourism_pressure) && dest.tourism_pressure.present? %>
+                    <span class="pill" style="font-size: 0.75rem;"><%= dest.tourism_pressure %></span>
+                  <% end %>
+                  <% if dest.respond_to?(:accessible_by_train) && dest.accessible_by_train %>
+                    <span class="pill" style="font-size: 0.75rem;">🚂 Train</span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# ── RIGHT: SIDEBAR ── %>
+      <div class="country-sidebar">
+
+        <%# CTA %>
+        <div class="sidebar-card sidebar-card--cta">
+          <p>Calculez l'empreinte d'un voyage vers <%= @country.name_fr %></p>
+          <%= link_to "Évaluer un voyage", new_trip_path(country_id: @country.id), class: "btn btn--primary btn--full" %>
+        </div>
+
+        <%# Similar countries %>
+        <% if @similar_countries.any? %>
+          <div class="sidebar-card">
+            <h3>Pays similaires</h3>
+            <div class="similar-list">
+              <% @similar_countries.each do |c| %>
+                <%= link_to country_path(c), class: "similar-item" do %>
+                  <span><%= c.flag_emoji %> <%= c.name_fr %></span>
+                  <span class="grade-badge-sm" style="background-color: <%= c.grade_color %>;"><%= c.grade %></span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Score breakdown %>
+        <div class="sidebar-card">
+          <h3>Score climatique</h3>
+          <div class="score-breakdown">
+            <div class="score-bar-lg">
+              <div class="score-fill-lg" style="width: <%= @country.climate_score || 0 %>%; background-color: <%= @country.grade_color %>;"></div>
+            </div>
+            <span class="score-number"><%= @country.climate_score&.round(1) %>/100</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>

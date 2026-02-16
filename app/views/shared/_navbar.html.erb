@@ -1,0 +1,65 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <%= link_to root_path, class: "logo" do %>
+        <span class="logo-temp">1.5°</span>
+        <span class="logo-text">Travel</span>
+      <% end %>
+    </div>
+
+    <button class="navbar-burger" id="navbar-burger" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="navbar-links" id="navbar-links">
+      <%= link_to "Explorer les pays", countries_path, class: "nav-link" %>
+      <%= link_to "Évaluer un voyage", new_trip_path, class: "nav-link nav-link--cta" %>
+      <%= link_to "Méthodologie", methodology_path, class: "nav-link" %>
+      <%= link_to "Pourquoi 1.5°", pourquoi_path, class: "nav-link" %>
+      <%= link_to "Carte", carte_path, class: "nav-link" %>
+
+      <% if user_signed_in? %>
+        <%= link_to "Mes voyages", trips_path, class: "nav-link" %>
+        <%= link_to "Déconnexion", destroy_user_session_path, data: { turbo_method: :delete }, class: "nav-link" %>
+      <% else %>
+        <%= link_to "Connexion", new_user_session_path, class: "nav-link" %>
+      <% end %>
+    </div>
+  </div>
+</nav>
+
+<script>
+  (function() {
+    // Éviter les listeners multiples
+    if (window._burgerInitialized) return;
+    window._burgerInitialized = true;
+
+    document.addEventListener("turbo:load", function() {
+      const burger = document.getElementById("navbar-burger");
+      const links = document.getElementById("navbar-links");
+      if (!burger || !links) return;
+
+      // Cloner le burger pour supprimer les anciens listeners
+      const newBurger = burger.cloneNode(true);
+      burger.parentNode.replaceChild(newBurger, burger);
+
+      newBurger.addEventListener("click", function() {
+        newBurger.classList.toggle("is-active");
+        links.classList.toggle("is-open");
+      });
+
+      links.querySelectorAll(".nav-link").forEach(function(link) {
+        link.addEventListener("click", function() {
+          newBurger.classList.remove("is-active");
+          links.classList.remove("is-open");
+        });
+      });
+
+      // Fermer le menu lors de la navigation
+      links.classList.remove("is-open");
+      newBurger.classList.remove("is-active");
+    });
+  })();
+</script>

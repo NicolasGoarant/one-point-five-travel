@@ -1,0 +1,307 @@
+<% content_for(:title) { "Voyagez aligné avec le climat" } %>
+
+<%# ── HERO SECTION ── %>
+<section class="hero">
+  <div class="hero-bg" style="background-image: url('<%= asset_path('photo_de_une.jpg') %>');"></div>
+  <div class="hero-container">
+    <h1 class="hero-title">
+      Choisissez votre destination<br>
+      selon le <span class="hero-accent">climat</span>.
+    </h1>
+    <p class="hero-subtitle">
+      1.5° Travel évalue chaque pays selon son respect de l'Accord de Paris
+      et calcule l'empreinte carbone de votre voyage. Transparent, sourcé, sans greenwashing.
+    </p>
+
+    <div class="hero-actions">
+      <%= link_to "Évaluer mon voyage", new_trip_path, class: "btn btn--primary btn--lg" %>
+      <%= link_to "Explorer le classement", countries_path, class: "btn btn--outline btn--lg" %>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-number"><%= @total_countries %></span>
+        <span class="hero-stat-label">pays évalués</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number"><%= @paris_compatible_count %></span>
+        <span class="hero-stat-label">compatibles 1.5°C</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">3</span>
+        <span class="hero-stat-label">piliers de scoring</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ── WORLD MAP ── %>
+<section class="section section--map">
+<section class="section section--map">
+  <div class="container">
+    <h2 class="section-title">L'action climatique dans le monde</h2>
+    <p class="section-subtitle">Survolez un pays pour voir son score. Cliquez pour accéder à sa fiche.</p>
+
+    <div class="map-legend map-legend--centered">
+      <div class="map-legend-items">
+        <div class="map-legend-item">
+          <span class="map-legend-color" style="background: #2D9D3A;"></span><span>A</span>
+        </div>
+        <div class="map-legend-item">
+          <span class="map-legend-color" style="background: #7BBF2A;"></span><span>B</span>
+        </div>
+        <div class="map-legend-item">
+          <span class="map-legend-color" style="background: #F5C542;"></span><span>C</span>
+        </div>
+        <div class="map-legend-item">
+          <span class="map-legend-color" style="background: #E8822A;"></span><span>D</span>
+        </div>
+        <div class="map-legend-item">
+          <span class="map-legend-color" style="background: #C62828;"></span><span>E</span>
+        </div>
+        <div class="map-legend-item">
+          <span class="map-legend-color" style="background: #E2E4E8;"></span><span>Non évalué</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="world-map-container">
+      <div id="world-map-home"></div>
+      <div id="map-tooltip-home" class="map-tooltip"></div>
+    </div>
+
+    <div class="section-cta">
+      <%= link_to "Explorer la carte complète →", carte_path, class: "btn btn--outline" %>
+    </div>
+  </div>
+</section>
+
+<%# ── HOW IT WORKS ── %>
+<section class="section section--how">
+  <div class="container">
+    <h2 class="section-title">Comment ça marche</h2>
+
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <div class="pillar-icon">🌍</div>
+        <h3>Climat Pays</h3>
+        <p>
+          Chaque pays est noté selon ses engagements climatiques réels :
+          objectifs de l'Accord de Paris, politiques en place, émissions par habitant.
+        </p>
+        <span class="pillar-source">Source : Climate Action Tracker, CCPI</span>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon">🚂</div>
+        <h3>Empreinte Trajet</h3>
+        <p>
+          Le CO₂ de votre transport, rapporté à la durée du séjour.
+          Un vol long-courrier pour 3 jours pèse plus lourd qu'un train pour 2 semaines.
+        </p>
+        <span class="pillar-source">Source : ADEME Base Empreinte</span>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon">🤝</div>
+        <h3>Impact Local</h3>
+        <p>
+          Le tourisme bénéficie-t-il à l'économie locale ?
+          La destination souffre-t-elle de surtourisme ?
+          Des alternatives certifiées existent-elles ?
+        </p>
+        <span class="pillar-source">Source : Banque Mondiale, WTTC</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ── GRADE SYSTEM ── %>
+<section class="section section--grades">
+  <div class="container">
+    <h2 class="section-title">Un score clair, comme le Nutri-Score</h2>
+    <p class="section-subtitle">De A à E, chaque voyage reçoit une note globale transparente.</p>
+
+    <div class="grades-display">
+      <% Trip::GRADES.each do |letter, info| %>
+        <div class="grade-badge" style="background-color: <%= info[:color] %>;">
+          <span class="grade-letter"><%= letter %></span>
+          <span class="grade-label"><%= info[:label] %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# ── TOP COUNTRIES ── %>
+<section class="section section--countries">
+  <div class="container">
+    <h2 class="section-title">Les pays les mieux notés</h2>
+    <p class="section-subtitle">Classement basé sur l'action climatique réelle, pas les promesses.</p>
+
+    <div class="countries-grid">
+      <% @top_countries.each_with_index do |country, index| %>
+        <%= link_to country_path(country), class: "country-card" do %>
+          <div class="country-card-header">
+            <span class="country-rank">#<%= index + 1 %></span>
+            <span class="country-flag"><%= country.flag_emoji %></span>
+            <span class="country-grade" style="background-color: <%= country.grade_color %>;">
+              <%= country.grade %>
+            </span>
+          </div>
+          <h3 class="country-name"><%= country.name_fr %></h3>
+          <div class="country-score-bar">
+            <div class="country-score-fill" style="width: <%= country.climate_score %>%; background-color: <%= country.cat_color %>;">
+            </div>
+          </div>
+          <div class="country-meta">
+            <span class="country-cat"><%= country.cat_label %></span>
+            <span class="country-score"><%= country.climate_score %>/100</span>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="section-cta">
+      <%= link_to "Voir tous les pays →", countries_path, class: "btn btn--outline" %>
+    </div>
+  </div>
+</section>
+
+<%# ── CTA ── %>
+<section class="section section--cta">
+  <div class="container">
+    <h2>Prêt à voyager autrement ?</h2>
+    <p>Évaluez votre prochain voyage en 30 secondes.</p>
+    <%= link_to "Calculer mon score", new_trip_path, class: "btn btn--primary btn--lg" %>
+  </div>
+</section>
+
+
+
+<script>
+  window.countriesData = <%= raw @countries_data %>;
+</script>
+
+
+
+<script>
+(function() {
+  if (window._homeMapInitialized) return;
+  window._homeMapInitialized = true;
+
+  const isoNumericToAlpha3 = {
+    "004":"AFG","008":"ALB","012":"DZA","020":"AND","024":"AGO","028":"ATG",
+    "031":"AZE","032":"ARG","036":"AUS","040":"AUT","044":"BHS","048":"BHR",
+    "050":"BGD","051":"ARM","052":"BRB","056":"BEL","060":"BMU","064":"BTN",
+    "068":"BOL","070":"BIH","072":"BWA","076":"BRA","084":"BLZ","090":"SLB",
+    "092":"VGB","096":"BRN","100":"BGR","104":"MMR","108":"BDI","112":"BLR",
+    "116":"KHM","120":"CMR","124":"CAN","132":"CPV","140":"CAF","144":"LKA",
+    "148":"TCD","152":"CHL","156":"CHN","158":"TWN","170":"COL","174":"COM",
+    "178":"COG","180":"COD","188":"CRI","191":"HRV","192":"CUB","196":"CYP",
+    "203":"CZE","204":"BEN","208":"DNK","214":"DOM","218":"ECU","222":"SLV",
+    "226":"GNQ","231":"ETH","232":"ERI","233":"EST","234":"FRO","242":"FJI",
+    "246":"FIN","250":"FRA","258":"PYF","262":"DJI","266":"GAB","268":"GEO",
+    "270":"GMB","275":"PSE","276":"DEU","288":"GHA","300":"GRC","308":"GRD",
+    "320":"GTM","324":"GIN","328":"GUY","332":"HTI","340":"HND","348":"HUN",
+    "352":"ISL","356":"IND","360":"IDN","364":"IRN","368":"IRQ","372":"IRL",
+    "376":"ISR","380":"ITA","384":"CIV","388":"JAM","392":"JPN","398":"KAZ",
+    "400":"JOR","404":"KEN","408":"PRK","410":"KOR","414":"KWT","417":"KGZ",
+    "418":"LAO","422":"LBN","426":"LSO","428":"LVA","430":"LBR","434":"LBY",
+    "440":"LTU","442":"LUX","450":"MDG","454":"MWI","458":"MYS","462":"MDV",
+    "466":"MLI","470":"MLT","478":"MRT","480":"MUS","484":"MEX","496":"MNG",
+    "498":"MDA","504":"MAR","508":"MOZ","512":"OMN","516":"NAM","520":"NRU",
+    "524":"NPL","528":"NLD","540":"NCL","554":"NZL","558":"NIC","562":"NER",
+    "566":"NGA","578":"NOR","586":"PAK","591":"PAN","598":"PNG","600":"PRY",
+    "604":"PER","608":"PHL","616":"POL","620":"PRT","624":"GNB","626":"TLS",
+    "630":"PRI","634":"QAT","642":"ROU","643":"RUS","646":"RWA","682":"SAU",
+    "686":"SEN","688":"SRB","694":"SLE","702":"SGP","703":"SVK","704":"VNM",
+    "705":"SVN","706":"SOM","710":"ZAF","716":"ZWE","724":"ESP","728":"SSD",
+    "729":"SDN","740":"SUR","748":"SWZ","752":"SWE","756":"CHE","760":"SYR",
+    "762":"TJK","764":"THA","768":"TGO","780":"TTO","784":"ARE","788":"TUN",
+    "792":"TUR","795":"TKM","800":"UGA","804":"UKR","807":"MKD","818":"EGY",
+    "826":"GBR","834":"TZA","840":"USA","854":"BFA","858":"URY","860":"UZB",
+    "862":"VEN","887":"YEM","894":"ZMB"
+  };
+
+  function renderMap() {
+    const container = document.getElementById("world-map-home");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const countryLookup = {};
+    if (!window.countriesData) return;
+    window.countriesData.forEach(c => { countryLookup[c.iso_code] = c; });
+
+    function getColor(isoAlpha3) {
+      const c = countryLookup[isoAlpha3];
+      return c ? c.grade_color : "#E2E4E8";
+    }
+
+    const width = container.clientWidth;
+    const height = Math.min(width * 0.5, 500);
+
+    const svg = d3.select("#world-map-home")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .style("width", "100%")
+      .style("height", "auto");
+
+    const projection = d3.geoNaturalEarth1()
+      .scale(width / 5.5)
+      .translate([width / 2, height / 2]);
+
+    const path = d3.geoPath().projection(projection);
+    const tooltip = document.getElementById("map-tooltip-home");
+
+    d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(function(world) {
+      const countries = topojson.feature(world, world.objects.countries).features;
+
+      svg.selectAll("path")
+        .data(countries)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", d => getColor(isoNumericToAlpha3[d.id]))
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 0.5)
+        .attr("class", "map-country")
+        .style("cursor", d => countryLookup[isoNumericToAlpha3[d.id]] ? "pointer" : "default")
+        .on("mouseover", function(event, d) {
+          const c = countryLookup[isoNumericToAlpha3[d.id]];
+          d3.select(this).attr("stroke", "#1A1A2E").attr("stroke-width", 2);
+          if (c && tooltip) {
+            tooltip.innerHTML = `
+              <div class="map-tooltip-header">
+                <span>${c.flag_emoji}</span>
+                <strong>${c.name_fr}</strong>
+                <span class="map-tooltip-grade" style="background:${c.grade_color};">${c.grade}</span>
+              </div>
+              <div class="map-tooltip-body">
+                <span>Score : ${c.climate_score}/100</span>
+                <span>${c.cat_label}</span>
+              </div>`;
+            tooltip.style.display = "block";
+          }
+        })
+        .on("mousemove", function(event) {
+          if (tooltip) {
+            tooltip.style.left = (event.pageX + 15) + "px";
+            tooltip.style.top = (event.pageY - 10) + "px";
+          }
+        })
+        .on("mouseout", function() {
+          d3.select(this).attr("stroke", "#fff").attr("stroke-width", 0.5);
+          if (tooltip) tooltip.style.display = "none";
+        })
+        .on("click", function(event, d) {
+          const c = countryLookup[isoNumericToAlpha3[d.id]];
+          if (c) window.location.href = c.path;
+        });
+    });
+  }
+
+  document.addEventListener("turbo:load", renderMap);
+})();
+</script>

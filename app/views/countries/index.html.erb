@@ -1,0 +1,102 @@
+<% content_for(:title) { "Classement climatique des pays" } %>
+
+<section class="section section--page-header">
+  <div class="container">
+    <h1>Classement climatique</h1>
+    <p class="page-subtitle">
+      <%= @countries.count %> pays évalués selon leur action climatique réelle.
+      Données : Climate Action Tracker, Germanwatch CCPI, Global Carbon Project.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+
+    <%# ── FILTERS ── %>
+    <div class="filters">
+      <div class="filter-group">
+        <label>Continent</label>
+        <div class="filter-pills">
+          <%= link_to "Tous", countries_path, class: "pill #{params[:continent].blank? ? 'pill--active' : ''}" %>
+          <% @continents.each do |continent| %>
+            <%= link_to continent.gsub("_", " "), countries_path(continent: continent),
+                class: "pill #{params[:continent] == continent ? 'pill--active' : ''}" %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Note CAT</label>
+        <div class="filter-pills">
+          <%= link_to "Toutes", countries_path(continent: params[:continent]),
+              class: "pill #{params[:rating].blank? ? 'pill--active' : ''}" %>
+          <% @ratings.each do |key, info| %>
+            <%= link_to "#{info[:emoji]} #{info[:label]}",
+                countries_path(continent: params[:continent], rating: key),
+                class: "pill #{params[:rating] == key ? 'pill--active' : ''}",
+                style: "border-color: #{info[:color]}" %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <%= form_tag countries_path, method: :get, class: "search-form" do %>
+          <%= hidden_field_tag :continent, params[:continent] %>
+          <%= text_field_tag :search, params[:search],
+              placeholder: "Rechercher un pays...",
+              class: "search-input",
+              autocomplete: "off" %>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ── COUNTRY TABLE ── %>
+    <div class="countries-table">
+      <div class="table-header">
+        <span class="col-rank">#</span>
+        <span class="col-country">Pays</span>
+        <span class="col-grade">Grade</span>
+        <span class="col-score">Score climat</span>
+        <span class="col-cat">Évaluation CAT</span>
+        <span class="col-emissions">CO₂/hab</span>
+        <span class="col-renewable">Renouvelables</span>
+        <span class="col-paris">Accord de Paris</span>
+      </div>
+
+      <% @countries.each_with_index do |country, index| %>
+        <%= link_to country_path(country), class: "table-row" do %>
+          <span class="col-rank"><%= index + 1 %></span>
+          <span class="col-country">
+            <span class="country-flag"><%= country.flag_emoji %></span>
+            <span><%= country.name_fr %></span>
+          </span>
+          <span class="col-grade">
+            <span class="grade-badge-sm" style="background-color: <%= country.grade_color %>;">
+              <%= country.grade %>
+            </span>
+          </span>
+          <span class="col-score">
+            <div class="score-bar-sm">
+              <div class="score-fill-sm" style="width: <%= country.climate_score %>%; background-color: <%= country.cat_color %>;"></div>
+            </div>
+            <span><%= country.climate_score %></span>
+          </span>
+          <span class="col-cat" style="color: <%= country.cat_color %>;">
+            <%= country.cat_label %>
+          </span>
+          <span class="col-emissions">
+            <%= country.emissions_per_capita %> t
+          </span>
+          <span class="col-renewable">
+            <%= country.renewable_energy_pct %>%
+          </span>
+          <span class="col-paris">
+            <%= country.paris_status_label %>
+          </span>
+        <% end %>
+      <% end %>
+    </div>
+
+  </div>
+</section>

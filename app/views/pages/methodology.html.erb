@@ -1,0 +1,302 @@
+<% content_for(:title) { "Méthodologie" } %>
+
+<section class="section section--page-header">
+  <div class="container">
+    <h1>Méthodologie de scoring</h1>
+    <p class="page-subtitle">
+      Comment 1.5° Travel évalue chaque voyage. Trois piliers, des données publiques,
+      une méthodologie transparente inspirée du Nutri-Score.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+
+    <%# ── INTRO ── %>
+    <div class="methodology-intro">
+      <p>
+        Chaque voyage reçoit une note globale de <strong>A</strong> (aligné 1.5°C) à <strong>E</strong>
+        (incompatible), calculée à partir de trois piliers pondérés. Les données proviennent
+        exclusivement de sources scientifiques reconnues — aucun score n'est sponsorisé.
+      </p>
+    </div>
+
+    <%# ── GRADE SCALE ── %>
+    <div class="methodology-grades">
+      <h2>Échelle de notation</h2>
+      <div class="grades-display">
+        <% Trip::GRADES.each do |letter, info| %>
+          <div class="grade-card" style="border-left: 4px solid <%= info[:color] %>;">
+            <span class="grade-letter-lg" style="color: <%= info[:color] %>;"><%= letter %></span>
+            <div>
+              <strong><%= info[:label] %></strong>
+              <span class="grade-range"><%= info[:min] %>–<%= letter == 'A' ? 100 : info[:min] + 19 %> points</span>
+              <p><%= info[:description] %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ── PILLAR 1 ── %>
+    <div class="methodology-pillar">
+      <div class="pillar-header">
+        <span class="pillar-icon-lg">🌍</span>
+        <div>
+          <h2>Pilier 1 — Climat Pays</h2>
+          <span class="pillar-weight">Poids par défaut : 30%</span>
+        </div>
+      </div>
+
+      <p>
+        Ce pilier mesure à quel point le pays de destination est aligné avec l'objectif
+        de l'Accord de Paris. Il agrège cinq indicateurs pondérés :
+      </p>
+
+      <table class="methodology-table">
+        <thead>
+          <tr>
+            <th>Indicateur</th>
+            <th>Poids</th>
+            <th>Source</th>
+            <th>Logique</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Note Climate Action Tracker</strong></td>
+            <td>40%</td>
+            <td>climateactiontracker.org</td>
+            <td>Évaluation globale des politiques climatiques, de « Compatible 1.5°C » à « Critique »</td>
+          </tr>
+          <tr>
+            <td><strong>Score CCPI Germanwatch</strong></td>
+            <td>25%</td>
+            <td>germanwatch.org/ccpi</td>
+            <td>Index de performance couvrant émissions, renouvelables et politique climatique (0-100)</td>
+          </tr>
+          <tr>
+            <td><strong>Émissions par habitant</strong></td>
+            <td>20%</td>
+            <td>Global Carbon Project</td>
+            <td>Échelle inversée : 0 t/hab = 100 points, 20+ t/hab = 0 points</td>
+          </tr>
+          <tr>
+            <td><strong>Part d'énergie renouvelable</strong></td>
+            <td>10%</td>
+            <td>IEA / Banque Mondiale</td>
+            <td>Pourcentage du mix énergétique provenant de sources renouvelables</td>
+          </tr>
+          <tr>
+            <td><strong>Tendance des émissions</strong></td>
+            <td>5%</td>
+            <td>Global Carbon Project</td>
+            <td>Baisse ≥ 5% = 100 pts, stable = 75, hausse légère = 40, hausse forte = 10</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pillar-note">
+        <strong>Notation CAT détaillée :</strong>
+        <div class="cat-ratings-list">
+          <% Country::CAT_RATINGS.each do |key, info| %>
+            <span class="cat-rating-badge" style="background-color: <%= info[:color] %>20; color: <%= info[:color] %>; border: 1px solid <%= info[:color] %>40;">
+              <%= info[:emoji] %> <%= info[:label] %> — <%= info[:score] %> pts
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# ── PILLAR 2 ── %>
+    <div class="methodology-pillar">
+      <div class="pillar-header">
+        <span class="pillar-icon-lg">🚂</span>
+        <div>
+          <h2>Pilier 2 — Empreinte Trajet</h2>
+          <span class="pillar-weight">Poids par défaut : 40%</span>
+        </div>
+      </div>
+
+      <p>
+        Ce pilier évalue l'empreinte carbone de votre transport. L'innovation clé :
+        le score est basé sur le <strong>CO₂ par jour de voyage</strong>, pas sur le CO₂ total.
+        Un séjour plus long « amortit » le carbone du transport et améliore le score.
+      </p>
+
+      <h3>Facteurs d'émission par mode de transport</h3>
+      <p>Source : ADEME Base Empreinte (2023), en kg CO₂eq par passager-kilomètre.</p>
+
+      <table class="methodology-table">
+        <thead>
+          <tr>
+            <th>Mode</th>
+            <th>CO₂/km (standard)</th>
+            <th>CO₂/km (court)</th>
+            <th>CO₂/km (long)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% TransportMode.order(:co2_per_km).each do |mode| %>
+            <tr>
+              <td><%= mode.icon %> <strong><%= mode.name_fr %></strong></td>
+              <td><%= mode.co2_per_km %> kg</td>
+              <td><%= mode.co2_per_km_short || "—" %> kg</td>
+              <td><%= mode.co2_per_km_long || "—" %> kg</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <h3>Calcul du score transport</h3>
+      <p>
+        Le CO₂ total du trajet aller-retour est divisé par le nombre de jours, puis converti
+        en score via une échelle logarithmique :
+      </p>
+      <div class="formula-box">
+        <p><strong>5 kg CO₂/jour</strong> (train en Europe, séjour long) → <strong>Score 100</strong></p>
+        <p><strong>200 kg CO₂/jour</strong> (vol long-courrier, séjour court) → <strong>Score 0</strong></p>
+        <p class="formula-detail">Les valeurs intermédiaires suivent une courbe logarithmique pour une distribution plus juste.</p>
+      </div>
+
+      <div class="pillar-note">
+        <strong>💡 Pourquoi le CO₂/jour ?</strong>
+        Un Paris → Tokyo en avion (10 000 kg CO₂ A/R) pendant 21 jours = 476 kg/jour.
+        Le même vol pour 3 jours = 3 333 kg/jour. La durée compte autant que le mode de transport.
+      </div>
+    </div>
+
+    <%# ── PILLAR 3 ── %>
+    <div class="methodology-pillar">
+      <div class="pillar-header">
+        <span class="pillar-icon-lg">🤝</span>
+        <div>
+          <h2>Pilier 3 — Impact Local</h2>
+          <span class="pillar-weight">Poids par défaut : 30%</span>
+        </div>
+      </div>
+
+      <p>
+        Ce pilier évalue si le tourisme bénéficie ou nuit aux communautés et écosystèmes locaux.
+        Il combine des données pays et des données spécifiques à la destination.
+      </p>
+
+      <table class="methodology-table">
+        <thead>
+          <tr>
+            <th>Indicateur</th>
+            <th>Source</th>
+            <th>Logique</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Part du tourisme dans le PIB</strong></td>
+            <td>WTTC / Banque Mondiale</td>
+            <td>Sweet spot 5-15% = 90 pts. Trop bas (marginal) ou trop haut (dépendance) = pénalité</td>
+          </tr>
+          <tr>
+            <td><strong>Aires protégées</strong></td>
+            <td>UNEP-WCMC</td>
+            <td>% du territoire protégé × 3, plafonné à 100</td>
+          </tr>
+          <tr>
+            <td><strong>Pression touristique</strong></td>
+            <td>UNWTO / estimation</td>
+            <td>Faible = 100, modérée = 75, forte = 40, surtourisme = 10</td>
+          </tr>
+          <tr>
+            <td><strong>Accessibilité train</strong></td>
+            <td>Analyse manuelle</td>
+            <td>Accessible = 80 pts, non accessible = 50 pts</td>
+          </tr>
+          <tr>
+            <td><strong>Certifications éco</strong></td>
+            <td>Labels reconnus</td>
+            <td>Chaque certification = +20 pts, plafonné à 100</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <%# ── WEIGHTING ── %>
+    <div class="methodology-pillar">
+      <div class="pillar-header">
+        <span class="pillar-icon-lg">⚖️</span>
+        <div>
+          <h2>Pondération et personnalisation</h2>
+        </div>
+      </div>
+
+      <p>
+        Le score global est la moyenne pondérée des trois piliers. Les poids par défaut reflètent
+        l'importance du transport dans l'empreinte carbone d'un voyage :
+      </p>
+
+      <div class="weights-display">
+        <div class="weight-bar">
+          <div class="weight-segment" style="width: 30%; background-color: #2D9D3A;">🌍 Climat 30%</div>
+          <div class="weight-segment" style="width: 40%; background-color: #1976D2;">🚂 Transport 40%</div>
+          <div class="weight-segment" style="width: 30%; background-color: #E8822A;">🤝 Impact 30%</div>
+        </div>
+      </div>
+
+      <p>
+        Les utilisateurs inscrits peuvent personnaliser ces pondérations selon leurs priorités,
+        tant que le total fait 100%. Un voyageur plus sensible à la politique climatique des pays
+        peut augmenter le poids du pilier Climat ; un voyageur urbain sans voiture peut renforcer
+        le poids Transport.
+      </p>
+    </div>
+
+    <%# ── SOURCES ── %>
+    <div class="methodology-pillar">
+      <div class="pillar-header">
+        <span class="pillar-icon-lg">📚</span>
+        <div>
+          <h2>Sources et transparence</h2>
+        </div>
+      </div>
+
+      <p>
+        Toutes les données utilisées par 1.5° Travel sont publiques et vérifiables.
+        Aucune donnée n'est inventée, aucun score n'est sponsorisé.
+      </p>
+
+      <div class="sources-grid">
+        <div class="source-card">
+          <strong>Climate Action Tracker</strong>
+          <p>Évaluation indépendante des politiques climatiques de 40+ pays</p>
+          <a href="https://climateactiontracker.org" target="_blank" rel="noopener">climateactiontracker.org</a>
+        </div>
+        <div class="source-card">
+          <strong>Germanwatch CCPI</strong>
+          <p>Climate Change Performance Index — classement annuel de 63 pays</p>
+          <a href="https://ccpi.org" target="_blank" rel="noopener">ccpi.org</a>
+        </div>
+        <div class="source-card">
+          <strong>ADEME Base Empreinte</strong>
+          <p>Facteurs d'émission officiels français pour les transports</p>
+          <a href="https://base-empreinte.ademe.fr" target="_blank" rel="noopener">base-empreinte.ademe.fr</a>
+        </div>
+        <div class="source-card">
+          <strong>Global Carbon Project</strong>
+          <p>Émissions par pays et par habitant, tendances annuelles</p>
+          <a href="https://globalcarbonproject.org" target="_blank" rel="noopener">globalcarbonproject.org</a>
+        </div>
+        <div class="source-card">
+          <strong>Banque Mondiale / WTTC</strong>
+          <p>Données tourisme (% PIB), aires protégées, indicateurs économiques</p>
+          <a href="https://data.worldbank.org" target="_blank" rel="noopener">data.worldbank.org</a>
+        </div>
+        <div class="source-card">
+          <strong>UNWTO</strong>
+          <p>Organisation Mondiale du Tourisme — flux touristiques et pression</p>
+          <a href="https://unwto.org" target="_blank" rel="noopener">unwto.org</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

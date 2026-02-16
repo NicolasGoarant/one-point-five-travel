@@ -1,0 +1,2 @@
+class TransportMode < ApplicationRecord
+end

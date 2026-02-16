@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= content_for?(:title) ? "#{yield(:title)} — 1.5° Travel" : "1.5° Travel — Voyagez aligné avec le climat" %></title>
+  <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : "Choisissez votre destination selon l'engagement climatique des pays. Scoring transparent basé sur l'Accord de Paris." %>">
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+
+  </head>
+<body class="<%= controller_name %> <%= action_name %>">
+
+  <%= render "shared/navbar" %>
+
+  <% flash.each do |type, message| %>
+    <div class="flash flash--<%= type %>">
+      <div class="flash-container">
+        <%= message %>
+        <button class="flash-close" data-action="click->flash#close">✕</button>
+      </div>
+    </div>
+  <% end %>
+
+  <main class="main-content">
+    <%= yield %>
+  </main>
+
+  <%= render "shared/footer" %>
+
+</body>
+</html>

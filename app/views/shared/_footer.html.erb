@@ -1,0 +1,34 @@
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <span class="footer-logo">1.5° Travel</span>
+      <p class="footer-tagline">Voyagez aligné avec le climat.</p>
+    </div>
+
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Explorer</h4>
+        <%= link_to "Classement pays", countries_path %>
+        <%= link_to "Évaluer un voyage", new_trip_path %>
+        <%= link_to "Pourquoi 1.5°", pourquoi_path %>
+      </div>
+      <div class="footer-col">
+        <h4>Comprendre</h4>
+        <%= link_to "Méthodologie", methodology_path %>
+        <%= link_to "À propos", about_path %>
+        <%= link_to "Sources", methodology_path(anchor: "sources") %>
+      </div>
+      <div class="footer-col">
+        <h4>Données</h4>
+        <a href="https://climateactiontracker.org" target="_blank">Climate Action Tracker</a>
+        <a href="https://www.germanwatch.org/en/ccpi" target="_blank">Germanwatch CCPI</a>
+        <a href="https://base-empreinte.ademe.fr" target="_blank">ADEME Base Empreinte</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; <%= Date.current.year %> 1.5° Travel — Données climatiques mises à jour : <%= Country.maximum(:data_last_updated)&.strftime("%B %Y") %></p>
+      <p class="footer-open">Méthodologie ouverte · Code source disponible · Données transparentes</p>
+    </div>
+  </div>
+</footer>
