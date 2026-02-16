@@ -1,19 +1,60 @@
 <% content_for(:title) { @country.name_fr } %>
 
-<section class="section section--page-header">
+<%# ── HERO CARD: photo + infos côte à côte ── %>
+<section class="country-hero">
   <div class="container">
-    <div class="country-header">
-      <span class="country-header-flag"><%= @country.flag_emoji %></span>
-      <div>
-        <h1><%= @country.name_fr %></h1>
-        <p class="page-subtitle"><%= @country.continent&.tr("_", " ") %> · <%= @country.capital %></p>
+    <div class="country-hero-card">
+
+      <div class="country-hero-photo" style="background-image: url('<%= country_photo_url(@country) %>');"></div>
+
+      <div class="country-hero-info">
+        <div class="country-hero-top">
+          <span class="country-hero-flag"><%= @country.flag_emoji %></span>
+          <div>
+            <h1 class="country-hero-name"><%= @country.name_fr %></h1>
+            <p class="country-hero-meta"><%= @country.continent&.tr("_", " ") %> · <%= @country.capital %></p>
+          </div>
+          <div class="country-hero-grade">
+            <span class="grade-badge-lg" style="background-color: <%= @country.grade_color %>;">
+              <%= @country.grade %>
+            </span>
+            <span class="country-hero-score"><%= @country.climate_score&.round(1) %>/100</span>
+          </div>
+        </div>
+
+        <%# Résumé climat auto-généré %>
+        <p class="country-hero-summary">
+          <%# Phrase d'accroche selon le grade %>
+          <% case @country.grade
+             when "A" %>
+            <strong><%= @country.name_fr %></strong> fait partie des pays les plus engagés dans la lutte contre le changement climatique.
+          <% when "B" %>
+            <strong><%= @country.name_fr %></strong> affiche des engagements climatiques encourageants, bien que des progrès restent à faire.
+          <% when "C" %>
+            <strong><%= @country.name_fr %></strong> présente un bilan climatique mitigé, avec des politiques en deçà de l'objectif 1.5°C.
+          <% when "D" %>
+            <strong><%= @country.name_fr %></strong> accuse un retard significatif sur ses engagements climatiques.
+          <% else %>
+            <strong><%= @country.name_fr %></strong> ne respecte pas les objectifs de l'Accord de Paris.
+          <% end %>
+
+          <%# Évaluation CAT %>
+          <% if @country.cat_rating.present? %>
+            Selon le Climate Action Tracker, ses politiques sont jugées « <%= @country.cat_label.downcase %> ».
+          <% end %>
+
+          <%# Émissions %>
+          <% if @country.emissions_per_capita.present? %>
+            Le pays émet <%= @country.emissions_per_capita.round(1) %> tonnes de CO₂ par habitant<%= @country.emissions_trend_pct.present? && @country.emissions_trend_pct < 0 ? ", en baisse de #{@country.emissions_trend_pct.abs.round(1)}%" : "" %>.
+          <% end %>
+
+          <%# Renouvelables %>
+          <% if @country.renewable_energy_pct.present? && @country.renewable_energy_pct > 0 %>
+            Les énergies renouvelables représentent <%= @country.renewable_energy_pct.round(0) %>% du mix énergétique.
+          <% end %>
+        </p>
       </div>
-      <div class="country-header-grade">
-        <span class="grade-badge-lg" style="background-color: <%= @country.grade_color %>;">
-          <%= @country.grade %>
-        </span>
-        <span class="grade-score"><%= @country.climate_score&.round(1) %>/100</span>
-      </div>
+
     </div>
   </div>
 </section>

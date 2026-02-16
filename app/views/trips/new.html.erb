@@ -36,6 +36,7 @@
               <%= f.text_field :origin_city,
                   placeholder: "ex: Nancy, Paris, Lyon...",
                   class: "form-input",
+                  id: "trip_origin_city",
                   required: true %>
             </div>
           </div>
@@ -47,7 +48,7 @@
               <%= f.label :country_id, "Pays" %>
               <%= f.collection_select :country_id, @countries, :id, :name_fr,
                   { prompt: "Choisir un pays..." },
-                  { class: "form-input form-select", required: true } %>
+                  { class: "form-input form-select", id: "trip_country_id", required: true } %>
             </div>
           </div>
 
@@ -59,7 +60,8 @@
               <div class="transport-options">
                 <% @transport_modes.each do |mode| %>
                   <label class="transport-option">
-                    <%= f.radio_button :transport_mode_id, mode.id %>
+                    <%= f.radio_button :transport_mode_id, mode.id,
+                        data: { icon: mode.icon || "🚀", name: mode.name_fr || mode.name, co2: (mode.co2_per_km * 1000).round(0) } %>
                     <div class="transport-option-content">
                       <span class="transport-icon"><%= mode.icon || "🚀" %></span>
                       <span class="transport-name"><%= mode.name_fr || mode.name %></span>
@@ -83,11 +85,11 @@
             <div class="form-row">
               <div class="form-group">
                 <%= f.label :duration_days, "Durée (jours)" %>
-                <%= f.number_field :duration_days, min: 1, max: 365, class: "form-input" %>
+                <%= f.number_field :duration_days, min: 1, max: 365, class: "form-input", id: "trip_duration_days" %>
               </div>
               <div class="form-group">
                 <%= f.label :travelers_count, "Voyageurs" %>
-                <%= f.number_field :travelers_count, min: 1, max: 20, class: "form-input" %>
+                <%= f.number_field :travelers_count, min: 1, max: 20, class: "form-input", id: "trip_travelers_count" %>
               </div>
             </div>
 
@@ -110,12 +112,61 @@
         <% end %>
       </div>
 
-      <%# ── SCORE PREVIEW PANEL ── %>
-      <div class="trip-score-panel">
-        <div class="score-preview">
-          <div class="score-preview-placeholder">
-            <span class="score-preview-icon">🌡️</span>
-            <p>Renseignez votre voyage pour voir votre score.</p>
+      <%# ── TRIP PREVIEW PANEL ── %>
+      <div class="trip-preview-panel" id="trip-preview">
+
+        <%# État vide %>
+        <div class="trip-preview-empty" id="preview-empty">
+          <div class="trip-preview-empty-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="38" stroke="#374151" stroke-width="2" stroke-dasharray="6 4"/>
+              <text x="40" y="46" text-anchor="middle" font-size="28">🧭</text>
+            </svg>
+          </div>
+          <p class="trip-preview-empty-text">Renseignez votre voyage<br>pour voir l'aperçu.</p>
+        </div>
+
+        <%# Aperçu dynamique %>
+        <div class="trip-preview-content" id="preview-content" style="display: none;">
+
+          <%# Route visuelle %>
+          <div class="trip-preview-route">
+            <div class="trip-preview-point">
+              <span class="trip-preview-dot trip-preview-dot--start"></span>
+              <span class="trip-preview-city" id="preview-origin">—</span>
+            </div>
+            <div class="trip-preview-line">
+              <span class="trip-preview-transport-icon" id="preview-transport-icon">✈️</span>
+            </div>
+            <div class="trip-preview-point">
+              <span class="trip-preview-dot trip-preview-dot--end"></span>
+              <span class="trip-preview-city" id="preview-destination">—</span>
+            </div>
+          </div>
+
+          <%# Infos voyage %>
+          <div class="trip-preview-details">
+            <div class="trip-preview-detail" id="preview-transport-row" style="display: none;">
+              <span class="trip-preview-detail-label">Transport</span>
+              <span class="trip-preview-detail-value" id="preview-transport-name">—</span>
+            </div>
+            <div class="trip-preview-detail" id="preview-co2-row" style="display: none;">
+              <span class="trip-preview-detail-label">Émission</span>
+              <span class="trip-preview-detail-value" id="preview-co2">—</span>
+            </div>
+            <div class="trip-preview-detail" id="preview-duration-row" style="display: none;">
+              <span class="trip-preview-detail-label">Durée</span>
+              <span class="trip-preview-detail-value" id="preview-duration">—</span>
+            </div>
+            <div class="trip-preview-detail" id="preview-travelers-row" style="display: none;">
+              <span class="trip-preview-detail-label">Voyageurs</span>
+              <span class="trip-preview-detail-value" id="preview-travelers">—</span>
+            </div>
+          </div>
+
+          <%# Message d'encouragement %>
+          <div class="trip-preview-nudge" id="preview-nudge" style="display: none;">
+            <p id="preview-nudge-text"></p>
           </div>
         </div>
       </div>
@@ -123,3 +174,119 @@
     </div>
   </div>
 </section>
+
+<script>
+(function() {
+  document.addEventListener("turbo:load", function() {
+    var origin   = document.getElementById("trip_origin_city");
+    var country  = document.getElementById("trip_country_id");
+    var duration = document.getElementById("trip_duration_days");
+    var travelers = document.getElementById("trip_travelers_count");
+    var radios   = document.querySelectorAll('input[name="trip[transport_mode_id]"]');
+
+    var empty   = document.getElementById("preview-empty");
+    var content = document.getElementById("preview-content");
+
+    var previewOrigin  = document.getElementById("preview-origin");
+    var previewDest    = document.getElementById("preview-destination");
+    var previewIcon    = document.getElementById("preview-transport-icon");
+    var previewTName   = document.getElementById("preview-transport-name");
+    var previewCo2     = document.getElementById("preview-co2");
+    var previewDur     = document.getElementById("preview-duration");
+    var previewTrav    = document.getElementById("preview-travelers");
+    var previewNudge   = document.getElementById("preview-nudge");
+    var previewNudgeT  = document.getElementById("preview-nudge-text");
+
+    if (!origin || !country) return;
+
+    function showRow(id, show) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = show ? "flex" : "none";
+    }
+
+    function update() {
+      var hasOrigin  = origin.value.trim().length > 0;
+      var hasDest    = country.value !== "";
+      var hasAnything = hasOrigin || hasDest;
+
+      if (hasAnything) {
+        empty.style.display = "none";
+        content.style.display = "flex";
+      } else {
+        empty.style.display = "flex";
+        content.style.display = "none";
+        return;
+      }
+
+      /* Origin */
+      previewOrigin.textContent = hasOrigin ? origin.value.trim() : "—";
+
+      /* Destination */
+      if (hasDest) {
+        var opt = country.options[country.selectedIndex];
+        previewDest.textContent = opt ? opt.textContent : "—";
+      } else {
+        previewDest.textContent = "—";
+      }
+
+      /* Transport */
+      var selected = document.querySelector('input[name="trip[transport_mode_id]"]:checked');
+      if (selected) {
+        previewIcon.textContent = selected.dataset.icon || "✈️";
+        previewTName.textContent = selected.dataset.name || "";
+        previewCo2.textContent = (selected.dataset.co2 || "?") + " g CO₂/km";
+        showRow("preview-transport-row", true);
+        showRow("preview-co2-row", true);
+      } else {
+        showRow("preview-transport-row", false);
+        showRow("preview-co2-row", false);
+        previewIcon.textContent = "✈️";
+      }
+
+      /* Duration */
+      var dur = parseInt(duration.value);
+      if (dur > 0) {
+        previewDur.textContent = dur + (dur > 1 ? " jours" : " jour");
+        showRow("preview-duration-row", true);
+      } else {
+        showRow("preview-duration-row", false);
+      }
+
+      /* Travelers */
+      var trav = parseInt(travelers.value);
+      if (trav > 0) {
+        previewTrav.textContent = trav + (trav > 1 ? " voyageurs" : " voyageur");
+        showRow("preview-travelers-row", true);
+      } else {
+        showRow("preview-travelers-row", false);
+      }
+
+      /* Nudge */
+      if (selected && dur > 0) {
+        var co2km = parseFloat(selected.dataset.co2);
+        if (co2km > 150) {
+          previewNudgeT.textContent = "💡 Un séjour plus long réduirait votre empreinte par jour.";
+          previewNudge.style.display = "block";
+          previewNudge.className = "trip-preview-nudge trip-preview-nudge--warn";
+        } else if (co2km <= 30) {
+          previewNudgeT.textContent = "🌿 Transport bas carbone — excellent choix !";
+          previewNudge.style.display = "block";
+          previewNudge.className = "trip-preview-nudge trip-preview-nudge--good";
+        } else {
+          previewNudge.style.display = "none";
+        }
+      } else {
+        previewNudge.style.display = "none";
+      }
+    }
+
+    origin.addEventListener("input", update);
+    country.addEventListener("change", update);
+    duration.addEventListener("input", update);
+    travelers.addEventListener("input", update);
+    radios.forEach(function(r) { r.addEventListener("change", update); });
+
+    update();
+  });
+})();
+</script>

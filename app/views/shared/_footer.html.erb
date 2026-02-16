@@ -2,39 +2,29 @@
   <div class="footer-container">
     <div class="footer-top">
       <div class="footer-brand">
-        <div class="footer-logo">1.5° Travel</div>
-        <p class="footer-tagline">Voyagez aligné avec le climat.</p>
+        <span class="footer-logo">1.5° Travel</span>
+        <span class="footer-tagline">— Voyagez aligné avec le climat.</span>
       </div>
-
       <div class="footer-links">
         <div class="footer-col">
-          <h4>Explorer</h4>
-          <%= link_to "Classement pays", countries_path %>
-          <%= link_to "Évaluer un voyage", new_trip_path %>
+          <%= link_to "Classement", countries_path %>
+          <%= link_to "Évaluer", new_trip_path %>
+          <%= link_to "Carte", carte_path %>
+        </div>
+        <div class="footer-col">
+          <%= link_to "Méthodologie", methodology_path %>
           <%= link_to "Pourquoi 1.5°", pourquoi_path %>
         </div>
         <div class="footer-col">
-          <h4>Comprendre</h4>
-          <%= link_to "Méthodologie", methodology_path %>
-          <%= link_to "À propos", pourquoi_path %>
-          <%= link_to "Sources", methodology_path(anchor: "sources") %>
-        </div>
-        <div class="footer-col">
-          <h4>Données</h4>
-          <a href="https://climateactiontracker.org" target="_blank" rel="noopener">Climate Action Tracker</a>
-          <a href="https://ccpi.org" target="_blank" rel="noopener">Germanwatch CCPI</a>
-          <a href="https://base-empreinte.ademe.fr" target="_blank" rel="noopener">ADEME Base Empreinte</a>
+          <a href="https://climateactiontracker.org" target="_blank" rel="noopener">CAT</a>
+          <a href="https://ccpi.org" target="_blank" rel="noopener">CCPI</a>
+          <a href="https://base-empreinte.ademe.fr" target="_blank" rel="noopener">ADEME</a>
         </div>
       </div>
     </div>
-
     <div class="footer-bottom">
-      <p>&copy; <%= Date.current.year %> 1.5° Travel — Données climatiques mises à jour : February 2026</p>
-      <p class="footer-open">
-        <%= link_to "Méthodologie ouverte", methodology_path %> ·
-        <a href="https://github.com" target="_blank" rel="noopener">Code source disponible</a> ·
-        Données transparentes
-      </p>
+      <span>&copy; <%= Date.current.year %> 1.5° Travel</span>
+      <span class="footer-open"><%= link_to "Méthodologie ouverte", methodology_path %> · Données transparentes</span>
     </div>
   </div>
 </footer>
