@@ -182,6 +182,33 @@
           </div>
         </div>
 
+        <%# Advocacy CTA for poorly rated countries %>
+        <% if @country.grade.in?(%w[D E]) %>
+          <div class="sidebar-card sidebar-card--advocacy">
+            <span class="advocacy-icon">✉️</span>
+            <h3>J'aurais aimé venir, mais...</h3>
+            <p>
+              Dites au <%= @country.name_fr %> pourquoi vous n'avez pas choisi cette destination.
+              Votre voix compte pour faire avancer les politiques climatiques.
+            </p>
+            <div class="advocacy-actions">
+              <%
+                tweet_text = "J'aurais aimé visiter #{@country.name_fr}, mais son bilan climatique (note #{@country.grade}, #{@country.climate_score&.round(0)}/100) m'en empêche. J'attends des engagements climatiques plus ambitieux. #15DegTravel #ClimateTourism"
+                tweet_url = "https://twitter.com/intent/tweet?text=#{ERB::Util.url_encode(tweet_text)}"
+                email_subject = "Touriste engagé : pourquoi je n'ai pas choisi #{@country.name_fr}"
+                email_body = "Madame, Monsieur le Ministre,\n\nEn tant que voyageur soucieux de l'environnement, j'aurais aimé visiter #{@country.name_fr}. Cependant, le bilan climatique de votre pays (note #{@country.grade} sur l'échelle 1.5° Travel, #{@country.climate_score&.round(0)}/100) m'a conduit à choisir une autre destination.\n\nJe vous encourage à renforcer les engagements climatiques de #{@country.name_fr} pour attirer les voyageurs responsables de demain.\n\nCordialement"
+                email_url = "mailto:?subject=#{ERB::Util.url_encode(email_subject)}&body=#{ERB::Util.url_encode(email_body)}"
+              %>
+              <a href="<%= tweet_url %>" target="_blank" rel="noopener" class="btn btn--advocacy btn--advocacy-twitter">
+                𝕏 Tweeter
+              </a>
+              <a href="<%= email_url %>" class="btn btn--advocacy btn--advocacy-email">
+                ✉️ Envoyer un email
+              </a>
+            </div>
+          </div>
+        <% end %>
+
       </div>
     </div>
   </div>

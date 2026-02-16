@@ -34,33 +34,18 @@
   <div class="hero-bg" style="background-image: url('<%= asset_path('photo_de_une.jpg') %>');"></div>
   <div class="hero-container">
     <h1 class="hero-title">
-      Voyagez selon les<br>
-      <span class="hero-accent">engagements climatiques</span><br>
+      Voyagez selon les
+      <span class="hero-accent">engagements climatiques</span>
       des pays.
     </h1>
     <p class="hero-subtitle">
-      Chaque pays est noté sur ses politiques climat réelles.
-      Choisissez votre destination en conscience, pas en greenwashing.
+      <strong>Chaque pays est noté sur ses politiques climat réelles.
+      Choisissez votre destination en conscience, pas en greenwashing.</strong>
     </p>
 
     <div class="hero-actions">
       <%= link_to "Évaluer mon voyage", new_trip_path, class: "btn btn--primary btn--lg" %>
       <%= link_to "Explorer le classement", countries_path, class: "btn btn--outline btn--lg" %>
-    </div>
-
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <span class="hero-stat-number"><%= @total_countries %></span>
-        <span class="hero-stat-label">pays évalués</span>
-      </div>
-      <div class="hero-stat">
-        <span class="hero-stat-number"><%= @paris_compatible_count %></span>
-        <span class="hero-stat-label">compatibles 1.5°C</span>
-      </div>
-      <div class="hero-stat">
-        <span class="hero-stat-number">3</span>
-        <span class="hero-stat-label">piliers de scoring</span>
-      </div>
     </div>
   </div>
 </section>
@@ -213,6 +198,44 @@
 
     <div class="section-cta" style="margin-top: var(--space-lg);">
       <%= link_to "Voir tous les pays →", countries_path, class: "btn btn--outline" %>
+    </div>
+  </div>
+</section>
+
+<%# ── ADVOCACY: VOTRE VOYAGE EST UN MESSAGE ── %>
+<section class="section section--tight section--advocacy-home">
+  <div class="container">
+    <div class="advocacy-home-card">
+      <div class="advocacy-home-content">
+        <span class="advocacy-home-emoji">✉️</span>
+        <h2>Votre voyage est aussi un message</h2>
+        <p>
+          Quand un pays ne respecte pas ses engagements climatiques,
+          vous pouvez lui dire. Un simple tweet ou email au ministre du tourisme
+          pour expliquer pourquoi vous avez choisi une autre destination.
+        </p>
+        <p class="advocacy-home-tagline">
+          <strong>« J'aurais aimé venir, mais... »</strong> — Le tourisme responsable
+          commence par un choix, et chaque choix envoie un signal.
+        </p>
+        <%= link_to countries_path, class: "btn btn--outline" do %>
+          Découvrir les pays notés D et E →
+        <% end %>
+      </div>
+      <div class="advocacy-home-visual">
+        <div class="advocacy-preview-tweet">
+          <div class="advocacy-tweet-header">
+            <span class="advocacy-tweet-avatar">🌍</span>
+            <div>
+              <strong>Voyageur·se engagé·e</strong>
+              <span>@traveler_15</span>
+            </div>
+          </div>
+          <p>J'aurais aimé visiter le <strong>[pays]</strong>, mais son bilan climatique
+          (note D, 42/100) m'en empêche. J'attends des engagements plus ambitieux.
+          <span class="advocacy-tweet-hashtag">#15DegTravel</span></p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
