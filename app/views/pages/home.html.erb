@@ -1,4 +1,6 @@
 <% content_for(:title) { "Voyagez aligné avec le climat" } %>
+<% content_for(:body_class) { "has-hero-navbar" } %>
+<% content_for(:navbar_class) { "navbar--transparent" } %>
 
 <%# Country photo mapping — fiable, pas d'API externe %>
 <%
@@ -66,7 +68,7 @@
 <%# ── GLOBE + NUTRI-SCORE ── %>
 <section class="section section--tight section--map">
   <div class="container">
-    <h2 class="section-title">Un score clair</h2>
+    <h2 class="section-title">Un score clair, comme le Nutri-Score</h2>
     <p class="section-subtitle">De A à E, chaque pays et chaque voyage reçoit une note globale transparente.</p>
 
     <div class="grades-display" style="margin-bottom: var(--space-lg);">
@@ -215,6 +217,36 @@
   </div>
 </section>
 
+<%# ── INSPIRATIONS VERTES ── %>
+<section class="section section--tight section--inspirations">
+  <div class="container">
+    <h2 class="section-title">Où partir pour rester sous les 1,5°C ?</h2>
+    <p class="section-subtitle">Des destinations magnifiques, compatibles avec le climat.</p>
+
+    <div class="inspirations-grid">
+      <%
+        inspirations = [
+          { name: "Costa Rica", tagline: "Forêts tropicales et énergie verte", photo: "https://images.unsplash.com/photo-1580977276076-ae4b8c219b8e?w=700&h=500&fit=crop", badge: "Champion climatique" },
+          { name: "Norvège", tagline: "Fjords et hydroélectricité", photo: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=700&h=500&fit=crop", badge: "98% renouvelable" },
+          { name: "Portugal", tagline: "Slow travel en train le long de la côte", photo: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=700&h=500&fit=crop", badge: "Accessible en train" },
+          { name: "Kenya", tagline: "Safari et géothermie", photo: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=700&h=500&fit=crop", badge: "Transition énergétique" }
+        ]
+      %>
+      <% inspirations.each do |inspi| %>
+        <div class="inspiration-card">
+          <div class="inspiration-img" style="background-image: url('<%= inspi[:photo] %>');">
+            <span class="inspiration-badge"><%= inspi[:badge] %></span>
+          </div>
+          <div class="inspiration-body">
+            <h3><%= inspi[:name] %></h3>
+            <p><%= inspi[:tagline] %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
 <%# ── CTA ── %>
 <section class="section section--cta section--cta-compact">
   <div class="container">
@@ -302,8 +334,8 @@
     var gradient = defs.append("radialGradient")
       .attr("id", "ocean-gradient")
       .attr("cx", "40%").attr("cy", "35%").attr("r", "60%");
-    gradient.append("stop").attr("offset", "0%").attr("stop-color", "#93C5FD");
-    gradient.append("stop").attr("offset", "100%").attr("stop-color", "#3B82F6");
+    gradient.append("stop").attr("offset", "0%").attr("stop-color", "#7EC8E3");
+    gradient.append("stop").attr("offset", "100%").attr("stop-color", "#1B4965");
 
     var projection = d3.geoOrthographic()
       .scale(vb / 2.15)
@@ -318,13 +350,13 @@
       .attr("cx", vb / 2).attr("cy", vb / 2)
       .attr("r", projection.scale())
       .attr("fill", "url(#ocean-gradient)")
-      .attr("stroke", "#60A5FA")
+      .attr("stroke", "#5FA8D3")
       .attr("stroke-width", 1.5);
 
     var graticule = d3.geoGraticule();
     var graticulePath = svg.append("path")
       .datum(graticule).attr("d", path)
-      .attr("fill", "none").attr("stroke", "#93C5FD")
+      .attr("fill", "none").attr("stroke", "#5FA8D3")
       .attr("stroke-width", 0.3).attr("stroke-opacity", 0.35);
 
     var drag = d3.drag()
@@ -346,7 +378,14 @@
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(function(world) {
       var countries = topojson.feature(world, world.objects.countries).features;
 
-      countriesPaths = svg.selectAll(".globe-country")
+    /* Country photo lookup for tooltips */
+    var countryPhotos = <%= raw(
+      (defined?(country_photo_url) ? CountriesHelper::COUNTRY_PHOTOS : country_photos)
+        .to_json
+    ) %>;
+    var fallbackImg = "<%= defined?(country_photo_url) ? CountriesHelper::FALLBACK_PHOTO : fallback_photo %>";
+
+    countriesPaths = svg.selectAll(".globe-country")
         .data(countries).enter().append("path")
         .attr("class", "globe-country").attr("d", path)
         .attr("fill", function(d) { return getColor(isoNumericToAlpha3[d.id]); })
@@ -358,9 +397,13 @@
           if (c) {
             d3.select(this).attr("stroke", "#1A1A2E").attr("stroke-width", 1.5);
             autoRotate = false;
+            var photoUrl = countryPhotos[alpha3] || fallbackImg;
             tooltip.innerHTML =
-              '<div class="map-tooltip-header"><span>' + c.flag_emoji + '</span><strong>' + c.name_fr + '</strong><span class="map-tooltip-grade" style="background:' + c.grade_color + ';">' + c.grade + '</span></div>' +
-              '<div class="map-tooltip-body"><span>Score : ' + c.climate_score + '/100</span><span>' + c.cat_label + '</span></div>';
+              '<div class="map-tooltip-photo" style="background-image:url(\'' + photoUrl + '\');"></div>' +
+              '<div class="map-tooltip-content">' +
+                '<div class="map-tooltip-header"><span>' + c.flag_emoji + '</span><strong>' + c.name_fr + '</strong><span class="map-tooltip-grade" style="background:' + c.grade_color + ';">' + c.grade + '</span></div>' +
+                '<div class="map-tooltip-body"><span>Score : ' + c.climate_score + '/100</span><span>' + c.cat_label + '</span></div>' +
+              '</div>';
             tooltip.style.display = "block";
           }
         })
@@ -397,5 +440,28 @@
   }
 
   document.addEventListener("turbo:load", renderGlobe);
+})();
+</script>
+
+<script>
+/* Navbar scroll: transparent → solid */
+(function() {
+  function initNavbarScroll() {
+    var navbar = document.querySelector(".navbar--transparent");
+    if (!navbar) return;
+
+    function onScroll() {
+      if (window.scrollY > 80) {
+        navbar.classList.add("navbar--scrolled");
+      } else {
+        navbar.classList.remove("navbar--scrolled");
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  document.addEventListener("turbo:load", initNavbarScroll);
 })();
 </script>
