@@ -1,88 +1,117 @@
 <% content_for(:title) { "Pourquoi 1.5°" } %>
 
-<section class="section section--page-header">
-  <div class="container">
-    <h1>Pourquoi 1.5°</h1>
-    <p class="page-subtitle">
-      Le nom de ce site n'est pas un slogan. C'est un seuil scientifique.
-      Et tout ce que nous construisons ici en découle.
-    </p>
+<%# ── HERO BANNER ── %>
+<section class="pourquoi-hero">
+  <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&h=500&fit=crop" alt="Terre vue de l'espace" loading="eager" class="pourquoi-hero-img">
+  <div class="pourquoi-hero-overlay">
+    <div class="container">
+      <h1>Pourquoi 1.5°</h1>
+      <p class="page-subtitle">
+        Le nom de ce site n'est pas un slogan. C'est un seuil scientifique.
+        Et tout ce que nous construisons ici en découle.
+      </p>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
 
-    <%# ── L'ACCORD DE PARIS ── %>
+    <%# ── 01 L'ACCORD DE PARIS ── %>
     <div class="manifesto-chapter">
       <div class="chapter-header">
         <span class="chapter-number">01</span>
-        <h2>L'Accord de Paris</h2>
+        <h2>🌐 L'Accord de Paris</h2>
       </div>
 
-      <div class="chapter-body">
-        <p>
-          Le 12 décembre 2015, à l'issue de la COP21, 196 États adoptent l'Accord de Paris
-          sur le climat. Pour la première fois dans l'histoire, la quasi-totalité des nations
-          s'engagent sur un objectif commun : <strong>limiter le réchauffement planétaire
-          à 1,5°C par rapport aux niveaux pré-industriels</strong>.
-        </p>
-        <p>
-          Ce seuil de 1,5°C n'a rien d'arbitraire. Au-delà, les scientifiques du GIEC
-          prévoient des conséquences irréversibles : disparition des récifs coralliens,
-          fonte accélérée des calottes glaciaires, multiplication des événements
-          climatiques extrêmes, déplacements massifs de populations.
-        </p>
-        <p>
-          L'Accord entre en vigueur le 4 novembre 2016. En 2025, dix ans après son adoption,
-          la trajectoire mondiale pointe vers +2,7°C. L'écart entre les engagements
-          et les actes reste considérable.
-        </p>
+      <div class="chapter-split">
+        <div class="chapter-body">
+          <p>
+            Le 12 décembre 2015, à l'issue de la COP21, 196 États adoptent l'Accord de Paris
+            sur le climat. Pour la première fois dans l'histoire, la quasi-totalité des nations
+            s'engagent sur un objectif commun : <strong>limiter le réchauffement planétaire
+            à 1,5°C par rapport aux niveaux pré-industriels</strong>.
+          </p>
+          <p>
+            Ce seuil de 1,5°C n'a rien d'arbitraire. Au-delà, les scientifiques du GIEC
+            prévoient des conséquences irréversibles : disparition des récifs coralliens,
+            fonte accélérée des calottes glaciaires, multiplication des événements
+            climatiques extrêmes, déplacements massifs de populations.
+          </p>
+          <p>
+            L'Accord entre en vigueur le 4 novembre 2016. En 2025, dix ans après son adoption,
+            la trajectoire mondiale pointe vers +2,7°C. L'écart entre les engagements
+            et les actes reste considérable.
+          </p>
+        </div>
+        <div class="chapter-photo">
+          <img src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=600&h=450&fit=crop" alt="Conférence climat COP" loading="lazy">
+        </div>
+      </div>
 
-        <div class="chapter-highlight">
-          <span class="highlight-temp">+1,5°C</span>
-          <div>
-            <strong>Le seuil à ne pas franchir.</strong>
-            Chaque dixième de degré compte. À +1,5°C, 70% des récifs coralliens disparaissent.
-            À +2°C, c'est 99%.
-          </div>
+      <div class="chapter-highlight">
+        <span class="highlight-temp">+1,5°C</span>
+        <div>
+          <strong>Le seuil à ne pas franchir.</strong>
+          Chaque dixième de degré compte. À +1,5°C, 70% des récifs coralliens disparaissent.
+          À +2°C, c'est 99%.
         </div>
       </div>
     </div>
 
-    <%# ── LE TOURISME ET LE CLIMAT ── %>
+    <%# ── 02 LE TOURISME ── %>
     <div class="manifesto-chapter">
       <div class="chapter-header">
         <span class="chapter-number">02</span>
-        <h2>Le tourisme, angle mort du débat climatique</h2>
+        <h2>✈️ Le tourisme, une clé du débat climatique</h2>
       </div>
 
-      <div class="chapter-body">
-        <p>
-          Le secteur du tourisme représente environ <strong>8% des émissions mondiales
-          de gaz à effet de serre</strong>. Les transports en constituent la majeure partie,
-          l'aviation à elle seule pesant 2,5% des émissions globales de CO₂.
-        </p>
-        <p>
-          Pourtant, le voyage reste l'un des rares domaines où l'information carbone
-          est quasi inexistante au moment du choix. On connaît l'étiquette énergétique
-          de son réfrigérateur, le Nutri-Score de ses céréales, mais rien ne nous dit
-          l'impact climatique d'un week-end à Marrakech versus deux semaines en Slovénie.
-        </p>
-        <p>
-          Les labels « tourisme durable » existants se concentrent sur l'hébergement —
-          un hôtel avec des serviettes en coton bio ne compense pas 3 tonnes de CO₂
-          émises pour y arriver. Et aucun ne prend en compte la politique climatique
-          du pays de destination.
-        </p>
+      <div class="chapter-split chapter-split--reverse">
+        <div class="chapter-body">
+          <p>
+            Le secteur du tourisme représente environ <strong>8% des émissions mondiales
+            de gaz à effet de serre</strong>. Les transports en constituent la majeure partie,
+            l'aviation à elle seule pesant 2,5% des émissions globales de CO₂.
+          </p>
+          <p>
+            Pourtant, le voyage reste l'un des rares domaines où l'information carbone
+            est quasi inexistante au moment du choix. On connaît l'étiquette énergétique
+            de son réfrigérateur, le Nutri-Score de ses céréales, mais rien ne nous dit
+            l'impact climatique d'un week-end à Marrakech versus deux semaines en Slovénie.
+          </p>
+          <p>
+            Les labels « tourisme durable » existants se concentrent sur l'hébergement —
+            un hôtel avec des serviettes en coton bio ne compense pas 3 tonnes de CO₂
+            émises pour y arriver. Et aucun ne prend en compte la politique climatique
+            du pays de destination.
+          </p>
+        </div>
+        <div class="chapter-photo">
+          <img src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=600&h=450&fit=crop" alt="Avion au-dessus des nuages" loading="lazy">
+        </div>
+      </div>
+
+      <div class="chapter-stats-row">
+        <div class="chapter-stat">
+          <span class="chapter-stat-number">8%</span>
+          <span class="chapter-stat-label">des émissions mondiales liées au tourisme</span>
+        </div>
+        <div class="chapter-stat">
+          <span class="chapter-stat-number">2,5%</span>
+          <span class="chapter-stat-label">des émissions de CO₂ pour l'aviation seule</span>
+        </div>
+        <div class="chapter-stat">
+          <span class="chapter-stat-number">0</span>
+          <span class="chapter-stat-label">label intégrant la politique climat du pays</span>
+        </div>
       </div>
     </div>
 
-    <%# ── NOTRE APPROCHE ── %>
+    <%# ── 03 CE QUE NOUS PROPOSONS ── %>
     <div class="manifesto-chapter">
       <div class="chapter-header">
         <span class="chapter-number">03</span>
-        <h2>Ce que 1.5° Travel propose</h2>
+        <h2>💡 Ce que 1.5° Travel propose</h2>
       </div>
 
       <div class="chapter-body">
@@ -91,9 +120,14 @@
           une richesse, un vecteur de compréhension mutuelle.
           Nous disons : <strong>voyagez en sachant</strong>.
         </p>
+      </div>
 
-        <div class="approach-cards">
-          <div class="approach-card">
+      <div class="approach-cards">
+        <div class="approach-card">
+          <div class="approach-card-photo">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop" alt="Données et graphiques" loading="lazy">
+          </div>
+          <div class="approach-card-content">
             <span class="approach-icon">🔬</span>
             <h3>Des données, pas du marketing</h3>
             <p>
@@ -102,7 +136,12 @@
               Chaque chiffre est vérifiable et sourcé.
             </p>
           </div>
-          <div class="approach-card">
+        </div>
+        <div class="approach-card">
+          <div class="approach-card-photo">
+            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=200&fit=crop" alt="Score et évaluation" loading="lazy">
+          </div>
+          <div class="approach-card-content">
             <span class="approach-icon">⚖️</span>
             <h3>Un score global, pas une interdiction</h3>
             <p>
@@ -111,7 +150,12 @@
               et des alternatives existent. À vous de choisir.
             </p>
           </div>
-          <div class="approach-card">
+        </div>
+        <div class="approach-card">
+          <div class="approach-card-photo">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop" alt="Paysage montagne" loading="lazy">
+          </div>
+          <div class="approach-card-content">
             <span class="approach-icon">🌍</span>
             <h3>Le pays, pas seulement l'avion</h3>
             <p>
@@ -120,7 +164,12 @@
               ses propres engagements climatiques. Nous intégrons cette dimension.
             </p>
           </div>
-          <div class="approach-card">
+        </div>
+        <div class="approach-card">
+          <div class="approach-card-photo">
+            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=200&fit=crop" alt="Train traversant un paysage" loading="lazy">
+          </div>
+          <div class="approach-card-content">
             <span class="approach-icon">⏱️</span>
             <h3>La durée change tout</h3>
             <p>
@@ -133,99 +182,129 @@
       </div>
     </div>
 
-    <%# ── LES PAYS FACE À LEURS ENGAGEMENTS ── %>
+    <%# ── 04 TOUS LES PAYS ── %>
     <div class="manifesto-chapter">
       <div class="chapter-header">
         <span class="chapter-number">04</span>
-        <h2>Tous les pays ne se valent pas</h2>
+        <h2>🗺️ Tous les pays ne se valent pas</h2>
       </div>
 
-      <div class="chapter-body">
-        <p>
-          Le Climate Action Tracker évalue les politiques climatiques de plus de 40 pays,
-          couvrant plus de 85% des émissions mondiales. Son verdict est sans appel :
-          en 2024, <strong>aucun grand émetteur n'est sur une trajectoire compatible
-          avec 1,5°C</strong>.
-        </p>
-        <p>
-          Mais les différences sont majeures. Le Danemark, le Royaume-Uni et le Costa Rica
-          figurent parmi les mieux notés. L'Arabie saoudite, la Russie et l'Iran
-          parmi les pires. La France se situe dans la catégorie « insuffisant » —
-          des politiques en progrès, mais un rythme trop lent.
-        </p>
-        <p>
-          En intégrant ces évaluations dans notre scoring, nous rendons visible
-          un critère que le voyageur n'a jamais eu : la responsabilité climatique
-          de sa destination.
-        </p>
-
-        <div class="chapter-cta">
-          <%= link_to "Explorer le classement des pays", countries_path, class: "btn btn--primary" %>
+      <div class="chapter-split">
+        <div class="chapter-body">
+          <p>
+            Le Climate Action Tracker évalue les politiques climatiques de plus de 40 pays,
+            couvrant plus de 85% des émissions mondiales. Son verdict est sans appel :
+            en 2024, <strong>aucun grand émetteur n'est sur une trajectoire compatible
+            avec 1,5°C</strong>.
+          </p>
+          <p>
+            Mais les différences sont majeures. Le Danemark, le Royaume-Uni et le Costa Rica
+            figurent parmi les mieux notés. L'Arabie saoudite, la Russie et l'Iran
+            parmi les pires. La France se situe dans la catégorie « insuffisant » —
+            des politiques en progrès, mais un rythme trop lent.
+          </p>
+          <p>
+            En intégrant ces évaluations dans notre scoring, nous rendons visible
+            un critère que le voyageur n'a jamais eu : la responsabilité climatique
+            de sa destination.
+          </p>
         </div>
+        <div class="chapter-photo">
+          <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=600&h=450&fit=crop" alt="Carte du monde" loading="lazy">
+        </div>
+      </div>
+
+      <div class="chapter-cta">
+        <%= link_to "Explorer le classement des pays →", countries_path, class: "btn btn--primary" %>
       </div>
     </div>
 
-    <%# ── BUDGET CARBONE ── %>
+    <%# ── 05 BUDGET CARBONE ── %>
     <div class="manifesto-chapter">
       <div class="chapter-header">
         <span class="chapter-number">05</span>
-        <h2>2 tonnes : votre budget carbone annuel</h2>
+        <h2>🌱 2 tonnes : votre budget carbone annuel</h2>
       </div>
 
-      <div class="chapter-body">
-        <p>
-          Pour rester sous 1,5°C, chaque humain dispose d'un budget carbone annuel
-          d'environ <strong>2 tonnes de CO₂</strong>. Aujourd'hui, un Français émet
-          en moyenne 9 tonnes. Un Américain, 15.
-        </p>
-        <p>
-          Un seul vol aller-retour Paris — New York émet environ 1,8 tonne de CO₂
-          par passager. Soit la quasi-totalité du budget annuel, en un seul trajet.
-        </p>
-        <p>
-          1.5° Travel vous montre exactement où se situe chaque voyage dans cette équation.
-          Pas pour culpabiliser — pour permettre des arbitrages éclairés.
-          Peut-être que ce vol transatlantique vaut le coup s'il dure trois semaines.
-          Peut-être que le week-end à Barcelone se fait mieux en train.
-        </p>
+      <div class="chapter-split chapter-split--reverse">
+        <div class="chapter-body">
+          <p>
+            Pour rester sous 1,5°C, chaque humain dispose d'un budget carbone annuel
+            d'environ <strong>2 tonnes de CO₂</strong>. Aujourd'hui, un Français émet
+            en moyenne 9 tonnes. Un Américain, 15.
+          </p>
+          <p>
+            Un seul vol aller-retour Paris — New York émet environ 1,8 tonne de CO₂
+            par passager. Soit la quasi-totalité du budget annuel, en un seul trajet.
+          </p>
+          <p>
+            1.5° Travel vous montre exactement où se situe chaque voyage dans cette équation.
+            Pas pour culpabiliser — pour permettre des arbitrages éclairés.
+            Peut-être que ce vol transatlantique vaut le coup s'il dure trois semaines.
+            Peut-être que le week-end à Barcelone se fait mieux en train.
+          </p>
+        </div>
+        <div class="chapter-photo">
+          <img src="https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?w=600&h=450&fit=crop" alt="Forêt et nature" loading="lazy">
+        </div>
+      </div>
 
-        <div class="chapter-highlight">
-          <span class="highlight-temp">2t</span>
-          <div>
-            <strong>Budget carbone annuel compatible 1,5°C.</strong>
-            Un Paris → New York A/R = 1,8t. Un Paris → Barcelone en train A/R = 0,01t.
-          </div>
+      <div class="chapter-highlight">
+        <span class="highlight-temp">2t</span>
+        <div>
+          <strong>Budget carbone annuel compatible 1,5°C.</strong>
+          Un Paris → New York A/R = 1,8t. Un Paris → Barcelone en train A/R = 0,01t.
+        </div>
+      </div>
+
+      <div class="chapter-stats-row">
+        <div class="chapter-stat">
+          <span class="chapter-stat-number">2t</span>
+          <span class="chapter-stat-label">budget annuel par personne (objectif 1.5°C)</span>
+        </div>
+        <div class="chapter-stat">
+          <span class="chapter-stat-number">9t</span>
+          <span class="chapter-stat-label">émissions moyennes d'un Français</span>
+        </div>
+        <div class="chapter-stat">
+          <span class="chapter-stat-number">1,8t</span>
+          <span class="chapter-stat-label">un seul Paris ↔ New York en avion</span>
         </div>
       </div>
     </div>
 
-    <%# ── VISION ── %>
-    <div class="manifesto-chapter">
+    <%# ── 06 VISION ── %>
+    <div class="manifesto-chapter manifesto-chapter--last">
       <div class="chapter-header">
         <span class="chapter-number">06</span>
-        <h2>Un outil pour un autre tourisme</h2>
+        <h2>🔭 Un outil pour un autre tourisme</h2>
       </div>
 
-      <div class="chapter-body">
-        <p>
-          1.5° Travel part d'une conviction : l'information est le premier levier
-          du changement. Avant les taxes, avant les interdictions, avant la culpabilité —
-          il y a le droit de savoir.
-        </p>
-        <p>
-          Nous voulons qu'un jour, choisir une destination en connaissant son score
-          climatique soit aussi naturel que vérifier la météo avant de partir.
-          Que les voyageurs récompensent, par leurs choix, les pays qui agissent.
-          Que le tourisme devienne un signal économique en faveur du climat.
-        </p>
-        <p>
-          Ce n'est ni naïf ni suffisant. Mais c'est un début. Et il commence
-          par un chiffre : <strong>1,5°</strong>.
-        </p>
-
-        <div class="chapter-cta">
-          <%= link_to "Évaluer mon premier voyage", new_trip_path, class: "btn btn--primary btn--lg" %>
+      <div class="chapter-split">
+        <div class="chapter-body">
+          <p>
+            1.5° Travel part d'une conviction : l'information est le premier levier
+            du changement. Avant les taxes, avant les interdictions, avant la culpabilité —
+            il y a le droit de savoir.
+          </p>
+          <p>
+            Nous voulons qu'un jour, choisir une destination en connaissant son score
+            climatique soit aussi naturel que vérifier la météo avant de partir.
+            Que les voyageurs récompensent, par leurs choix, les pays qui agissent.
+            Que le tourisme devienne un signal économique en faveur du climat.
+          </p>
+          <p>
+            Ce n'est ni naïf ni suffisant. Mais c'est un début. Et il commence
+            par un chiffre : <strong>1,5°</strong>.
+          </p>
         </div>
+        <div class="chapter-photo">
+          <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=450&fit=crop" alt="Route vers l'horizon" loading="lazy">
+        </div>
+      </div>
+
+      <div class="chapter-cta" style="text-align: center; margin-top: var(--space-xl);">
+        <%= link_to "Évaluer mon premier voyage →", new_trip_path, class: "btn btn--primary btn--lg" %>
       </div>
     </div>
 

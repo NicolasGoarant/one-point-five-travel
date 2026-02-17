@@ -203,24 +203,29 @@
 <%# ── ADVOCACY: VOTRE VOYAGE EST UN MESSAGE ── %>
 <section class="section section--tight section--advocacy-home">
   <div class="container">
-    <div class="advocacy-home-card">
+    <div class="advocacy-home-block">
+
+      <%# Left: photo %>
+      <div class="advocacy-home-photo">
+        <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=600&fit=crop" alt="Voyageur face au monde" loading="lazy">
+      </div>
+
+      <%# Right: message + tweet %>
       <div class="advocacy-home-content">
-        <span class="advocacy-home-emoji">✉️</span>
-        <h2>Votre voyage est aussi un message</h2>
+        <h2>📣 Votre voyage est aussi un message</h2>
         <p>
           Quand un pays ne respecte pas ses engagements climatiques,
           vous pouvez lui dire. Un simple tweet ou email au ministre du tourisme
           pour expliquer pourquoi vous avez choisi une autre destination.
         </p>
-        <p class="advocacy-home-tagline">
-          <strong>« J'aurais aimé venir, mais... »</strong> — Le tourisme responsable
-          commence par un choix, et chaque choix envoie un signal.
-        </p>
-        <%= link_to countries_path, class: "btn btn--outline" do %>
-          Découvrir les pays notés D et E →
-        <% end %>
-      </div>
-      <div class="advocacy-home-visual">
+
+        <div class="advocacy-home-quote">
+          <p>
+            <strong>« J'aurais aimé venir, mais... »</strong> — Le tourisme responsable
+            commence par un choix, et chaque choix envoie un signal.
+          </p>
+        </div>
+
         <div class="advocacy-preview-tweet">
           <div class="advocacy-tweet-header">
             <span class="advocacy-tweet-avatar">🌍</span>
@@ -228,12 +233,18 @@
               <strong>Voyageur·se engagé·e</strong>
               <span>@traveler_15</span>
             </div>
+            <span class="advocacy-tweet-x">𝕏</span>
           </div>
           <p>J'aurais aimé visiter le <strong>[pays]</strong>, mais son bilan climatique
           (note D, 42/100) m'en empêche. J'attends des engagements plus ambitieux.
           <span class="advocacy-tweet-hashtag">#15DegTravel</span></p>
         </div>
+
+        <%= link_to countries_path(grade: "D"), class: "btn btn--advocacy-cta" do %>
+          Découvrir les pays notés D et E →
+        <% end %>
       </div>
+
     </div>
   </div>
 </section>
