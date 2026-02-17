@@ -1,123 +1,259 @@
-<% content_for(:title) { "Score voyage — #{@trip.country.name_fr}" } %>
+<%# app/views/trips/show.html.erb — v3 %>
+
+<% content_for(:title) { "#{@trip.origin_city} → #{@trip.country.name_fr} · #{@trip.grade}" } %>
 
 <%
   grade_info = Trip::GRADES[@trip.grade] || Trip::GRADES["C"]
   grade_color = grade_info[:color]
+  recommendations = begin JSON.parse(@trip.recommendations || "[]") rescue [] end
+  coherence_days = @trip.co2_transport_kg.to_f > 0 ? (@trip.co2_transport_kg / 30.0).ceil : nil
+  budget_pct = (@trip.co2_total_kg.to_f / TripScoringService::ANNUAL_TRAVEL_CO2_BUDGET_KG * 100).round(0)
+  travelers = @trip.travelers_count || 1
 %>
 
-<section class="section section--page-header">
+<%# ═══════════════════════════════════════════
+    LOADING OVERLAY — light, navbar stays visible
+    ═══════════════════════════════════════════ %>
+
+<div class="trip-loading-overlay" id="tripLoadingOverlay">
+  <div class="trip-loading-content">
+    <div class="trip-loading-spinner" style="border-top-color: <%= grade_color %>;"></div>
+    <p class="trip-loading-route">
+      <%= @trip.origin_city %> → <%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %>
+    </p>
+    <div class="trip-loading-steps">
+      <p class="trip-loading-step" id="loadingStep1">🌍 Analyse du pays de destination…</p>
+      <p class="trip-loading-step" id="loadingStep2"><%= @trip.transport_mode.icon %> Calcul de l'empreinte transport…</p>
+      <p class="trip-loading-step" id="loadingStep3">🤝 Évaluation de l'impact local…</p>
+      <p class="trip-loading-step" id="loadingStep4">🌡️ Score final…</p>
+    </div>
+  </div>
+</div>
+
+<%# ═══════════════════════════════════════════
+    HERO — Light background, big grade
+    ═══════════════════════════════════════════ %>
+
+<section class="trip-result-hero trip-reveal">
   <div class="container">
-    <div class="trip-result-header">
-      <div>
-        <p class="trip-result-route">
-          <%= @trip.origin_city || "Départ" %> → <%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %>
-        </p>
-        <h1>Résultat de votre voyage</h1>
-      </div>
-      <div class="trip-result-grade">
-        <div class="grade-badge-lg" style="background-color: <%= grade_color %>;">
-          <%= @trip.grade %>
-        </div>
-        <span class="grade-score"><%= grade_info[:label] %></span>
+
+    <%# Top: route + meta %>
+    <div class="trip-result-route-bar">
+      <span class="trip-result-route-text">
+        <%= @trip.origin_city %>
+        <span class="trip-result-route-arrow">→</span>
+        <%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %>
+      </span>
+      <div class="trip-result-meta-pills">
+        <span class="trip-meta-pill"><%= @trip.transport_mode.icon %> <%= @trip.transport_mode.name_fr %></span>
+        <span class="trip-meta-pill">📅 <%= @trip.duration_days %> jours</span>
+        <span class="trip-meta-pill">📏 <%= number_with_delimiter(@trip.distance_km&.round(0)) %> km</span>
+        <span class="trip-meta-pill">👤 <%= travelers %> voyageur<%= travelers > 1 ? 's' : '' %></span>
       </div>
     </div>
+
+    <%# Center: BIG grade display %>
+    <div class="trip-result-score-showcase">
+      <div class="trip-result-grade-ring" style="--grade-color: <%= grade_color %>;">
+        <span class="trip-result-grade-letter"><%= @trip.grade %></span>
+      </div>
+      <div class="trip-result-score-text">
+        <span class="trip-result-score-number" style="color: <%= grade_color %>;"><%= @trip.overall_score&.round(0) %><small>/100</small></span>
+        <span class="trip-result-score-label"><%= grade_info[:label] %></span>
+        <p class="trip-result-score-desc"><%= grade_info[:description] %></p>
+      </div>
+    </div>
+
+    <%# Bottom: explanation bar %>
+    <div class="trip-result-explain">
+      <div class="trip-result-explain-bar">
+        <div class="trip-result-explain-fill" style="width: <%= @trip.overall_score&.round(0) || 0 %>%; background: <%= grade_color %>;"></div>
+        <div class="trip-result-explain-marker" style="left: <%= @trip.overall_score&.round(0) || 0 %>%;">
+          <span><%= @trip.overall_score&.round(0) %></span>
+        </div>
+      </div>
+      <div class="trip-result-explain-grades">
+        <span style="color: #C62828;">E</span>
+        <span style="color: #E8822A;">D</span>
+        <span style="color: #F5C542;">C</span>
+        <span style="color: #7BBF2A;">B</span>
+        <span style="color: #2D9D3A;">A</span>
+      </div>
+      <p class="trip-result-explain-text">
+        Score calculé à partir de 3 piliers :
+        climat du pays (<%= @trip.climate_weight_used %>%),
+        empreinte trajet (<%= @trip.transport_weight_used %>%),
+        impact local (<%= @trip.local_impact_weight_used %>%).
+      </p>
+    </div>
+
   </div>
 </section>
 
+<%# ═══════════════════════════════════════════
+    BODY
+    ═══════════════════════════════════════════ %>
+
 <section class="section">
   <div class="container">
-    <div class="country-layout">
+    <div class="trip-result-layout">
 
-      <%# ── Main column ── %>
-      <div class="country-main">
+      <%# ── MAIN ── %>
+      <div class="trip-result-main">
 
-        <%# ── Overall score ── %>
-        <div class="detail-card">
-          <h2>Score global : <%= @trip.overall_score&.round(0) %>/100</h2>
-          <p class="country-description"><%= grade_info[:description] %></p>
+        <%# 3 PILLARS %>
+        <div class="detail-card trip-reveal">
+          <h2>Les 3 piliers de votre score</h2>
+          <div class="trip-pillars">
 
-          <div class="trip-score-breakdown">
-            <div class="stat-row">
-              <span>🌍 Climat pays</span>
-              <div class="score-bar-md">
-                <div class="score-fill-md" style="width: <%= @trip.climate_country_score || 0 %>%; background-color: <%= grade_color %>;"></div>
+            <% climate_pct = @trip.climate_country_score&.round(0) || 0 %>
+            <div class="trip-pillar">
+              <div class="trip-pillar-header">
+                <span class="trip-pillar-icon">🌍</span>
+                <div class="trip-pillar-text">
+                  <h3>Climat pays</h3>
+                  <p class="trip-pillar-sub">Action climatique de <%= @trip.country.name_fr %></p>
+                </div>
+                <div class="trip-pillar-score-box">
+                  <span class="trip-pillar-score" style="color: <%= pillar_color(climate_pct) %>;"><%= climate_pct %></span>
+                  <span class="trip-pillar-score-label">/ 100</span>
+                </div>
               </div>
-              <strong><%= @trip.climate_country_score&.round(0) %>/100</strong>
+              <div class="trip-pillar-bar">
+                <div class="trip-pillar-fill" style="width: <%= climate_pct %>%; background: <%= pillar_color(climate_pct) %>;"></div>
+              </div>
+              <div class="trip-pillar-detail">
+                <span>Note CAT : <strong style="color: <%= @trip.country.cat_color %>;"><%= @trip.country.cat_label %></strong></span>
+                <span>Émissions : <%= @trip.country.emissions_per_capita&.round(1) %> t CO₂/hab</span>
+              </div>
             </div>
 
-            <div class="stat-row">
-              <span>🚂 Transport</span>
-              <div class="score-bar-md">
-                <div class="score-fill-md" style="width: <%= @trip.transport_score || 0 %>%; background-color: <%= grade_color %>;"></div>
+            <% transport_pct = @trip.transport_score&.round(0) || 0 %>
+            <div class="trip-pillar">
+              <div class="trip-pillar-header">
+                <span class="trip-pillar-icon"><%= @trip.transport_mode.icon %></span>
+                <div class="trip-pillar-text">
+                  <h3>Empreinte trajet</h3>
+                  <p class="trip-pillar-sub">CO₂ du transport rapporté à la durée du séjour</p>
+                </div>
+                <div class="trip-pillar-score-box">
+                  <span class="trip-pillar-score" style="color: <%= pillar_color(transport_pct) %>;"><%= transport_pct %></span>
+                  <span class="trip-pillar-score-label">/ 100</span>
+                </div>
               </div>
-              <strong><%= @trip.transport_score&.round(0) %>/100</strong>
+              <div class="trip-pillar-bar">
+                <div class="trip-pillar-fill" style="width: <%= transport_pct %>%; background: <%= pillar_color(transport_pct) %>;"></div>
+              </div>
+              <div class="trip-pillar-detail">
+                <span><%= @trip.co2_per_day_kg&.round(1) %> kg CO₂/jour de séjour</span>
+                <span><%= @trip.co2_transport_kg&.round(0) %> kg CO₂ transport A/R</span>
+              </div>
             </div>
 
-            <div class="stat-row">
-              <span>🤝 Impact local</span>
-              <div class="score-bar-md">
-                <div class="score-fill-md" style="width: <%= @trip.local_impact_score || 0 %>%; background-color: <%= grade_color %>;"></div>
+            <% local_pct = @trip.local_impact_score&.round(0) || 0 %>
+            <div class="trip-pillar">
+              <div class="trip-pillar-header">
+                <span class="trip-pillar-icon">🤝</span>
+                <div class="trip-pillar-text">
+                  <h3>Impact local</h3>
+                  <p class="trip-pillar-sub">Bénéfice pour l'économie locale</p>
+                </div>
+                <div class="trip-pillar-score-box">
+                  <span class="trip-pillar-score" style="color: <%= pillar_color(local_pct) %>;"><%= local_pct %></span>
+                  <span class="trip-pillar-score-label">/ 100</span>
+                </div>
               </div>
-              <strong><%= @trip.local_impact_score&.round(0) %>/100</strong>
+              <div class="trip-pillar-bar">
+                <div class="trip-pillar-fill" style="width: <%= local_pct %>%; background: <%= pillar_color(local_pct) %>;"></div>
+              </div>
+              <div class="trip-pillar-detail">
+                <span>Tourisme = <%= @trip.country.tourism_gdp_pct&.round(1) %>% du PIB</span>
+                <span><%= @trip.country.protected_areas_pct %>% d'aires protégées</span>
+              </div>
+            </div>
+
+          </div>
+          <p class="trip-weights-note">
+            Pondération : Climat <%= @trip.climate_weight_used %>% · Transport <%= @trip.transport_weight_used %>% · Impact local <%= @trip.local_impact_weight_used %>%
+          </p>
+        </div>
+
+        <%# CO₂ %>
+        <div class="detail-card trip-reveal">
+          <h2>Votre empreinte carbone</h2>
+          <div class="co2-summary">
+            <div class="co2-total">
+              <span class="co2-number"><%= @trip.co2_total_kg&.round(0) %></span>
+              <span class="co2-unit">kg CO₂</span>
+              <span class="co2-label">émissions totales<%= travelers > 1 ? " (par personne)" : "" %></span>
+            </div>
+            <div class="co2-details-grid">
+              <div class="co2-detail-item">
+                <span class="co2-detail-icon"><%= @trip.transport_mode.icon %></span>
+                <span class="co2-detail-value"><%= @trip.co2_transport_kg&.round(0) %> kg</span>
+                <span class="co2-detail-label">Transport A/R</span>
+              </div>
+              <div class="co2-detail-item">
+                <span class="co2-detail-icon">🏨</span>
+                <span class="co2-detail-value"><%= @trip.co2_accommodation_kg&.round(0) %> kg</span>
+                <span class="co2-detail-label">Hébergement</span>
+              </div>
+              <div class="co2-detail-item">
+                <span class="co2-detail-icon">📅</span>
+                <span class="co2-detail-value"><%= @trip.co2_per_day_kg&.round(1) %> kg</span>
+                <span class="co2-detail-label">Par jour</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="co2-budget">
+            <div class="co2-budget-header">
+              <span>Budget carbone voyage annuel (objectif 1.5°C)</span>
+              <span class="co2-budget-pct <%= budget_pct > 100 ? 'co2-budget-pct--over' : '' %>"><%= budget_pct %>%</span>
+            </div>
+            <div class="co2-budget-bar">
+              <div class="co2-budget-fill" style="width: <%= [budget_pct, 100].min %>%; background: <%= budget_pct > 100 ? 'var(--red)' : budget_pct > 60 ? 'var(--orange)' : 'var(--green-btn)' %>;"></div>
+            </div>
+            <p class="co2-budget-legend">
+              Ce voyage représente <strong><%= budget_pct %>%</strong> du budget annuel de <%= TripScoringService::ANNUAL_TRAVEL_CO2_BUDGET_KG %> kg CO₂
+              compatible avec l'objectif 1.5°C.
+              <% if budget_pct > 100 %>
+                <span class="co2-budget-warning">⚠️ Ce seul voyage dépasse votre budget annuel.</span>
+              <% end %>
+            </p>
+          </div>
+
+          <div class="co2-equivalences">
+            <span class="co2-equiv-label">Équivalent à :</span>
+            <div class="co2-equiv-items">
+              <span class="co2-equiv">🚗 <%= (@trip.co2_total_kg.to_f / 0.21).round(0) %> km en voiture</span>
+              <span class="co2-equiv">🥩 <%= (@trip.co2_total_kg.to_f / 27).round(0) %> repas avec du bœuf</span>
+              <span class="co2-equiv">📱 <%= (@trip.co2_total_kg.to_f / 0.05).round(0) %> h de streaming</span>
             </div>
           </div>
         </div>
 
-        <%# ── CO2 Details ── %>
-        <div class="detail-card">
-          <h2>Empreinte carbone</h2>
-
-          <div class="stats-grid">
-            <div class="stat-box">
-              <span class="stat-label">CO₂ transport (A/R)</span>
-              <span class="stat-value"><%= @trip.co2_transport_kg&.round(0) || "—" %> <small>kg</small></span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">CO₂ hébergement</span>
-              <span class="stat-value"><%= @trip.co2_accommodation_kg&.round(0) || "—" %> <small>kg</small></span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">CO₂ total</span>
-              <span class="stat-value"><%= @trip.co2_total_kg&.round(0) || "—" %> <small>kg</small></span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">CO₂ par jour</span>
-              <span class="stat-value"><%= @trip.co2_per_day_kg&.round(1) || "—" %> <small>kg/j</small></span>
-            </div>
-          </div>
-
-          <% if @trip.distance_km.present? %>
-            <div class="stat-row">
-              <span>Distance estimée (vol d'oiseau)</span>
-              <strong><%= number_with_delimiter(@trip.distance_km.round(0)) %> km</strong>
-            </div>
-          <% end %>
-
-          <% if @trip.co2_total_kg.present? %>
-            <div class="stat-row">
-              <span>Budget carbone voyage annuel (1.5°C)</span>
-              <strong>600 kg</strong>
-            </div>
-            <div class="stat-row">
-              <span>Part consommée par ce voyage</span>
-              <strong class="<%= @trip.co2_total_kg > 600 ? 'stat-trend--bad' : 'stat-trend--good' %>">
-                <%= (@trip.co2_total_kg / 600.0 * 100).round(0) %>%
-              </strong>
-            </div>
-          <% end %>
-        </div>
-
-        <%# ── Recommendations ── %>
-        <% if @recommendations.present? && @recommendations.any? %>
-          <div class="detail-card">
-            <h2>Recommandations</h2>
+        <%# RECOMMENDATIONS %>
+        <% if recommendations.any? %>
+          <div class="detail-card trip-reveal">
+            <h2>Comment améliorer ce score ?</h2>
             <div class="recommendations-list">
-              <% @recommendations.each do |tip| %>
-                <div class="recommendation-item recommendation-item--<%= tip['priority'] %>">
+              <% recommendations.each do |rec| %>
+                <%
+                  rec_icon = case rec['type']
+                             when 'transport'    then '🚂'
+                             when 'climate'      then '🌍'
+                             when 'local_impact' then '🤝'
+                             when 'duration'     then '⏱️'
+                             else '💡'
+                             end
+                %>
+                <div class="recommendation-item recommendation-item--<%= rec['priority'] %>">
+                  <div class="recommendation-icon"><%= rec_icon %></div>
                   <div class="recommendation-content">
-                    <p><%= tip['message'] %></p>
-                    <% if tip['potential_improvement'].present? %>
-                      <span class="recommendation-impact"><%= tip['potential_improvement'] %></span>
+                    <p><%= rec['message'] %></p>
+                    <% if rec['potential_improvement'].present? %>
+                      <span class="recommendation-impact"><%= rec['potential_improvement'] %></span>
                     <% end %>
                   </div>
                 </div>
@@ -126,64 +262,106 @@
           </div>
         <% end %>
 
+        <%# COHERENCE %>
+        <% if @trip.transport_mode.name&.include?("plane") && coherence_days && @trip.duration_days && @trip.duration_days < coherence_days %>
+          <div class="detail-card trip-coherence-card trip-reveal">
+            <div class="trip-coherence-inner">
+              <span class="trip-coherence-icon">⏱️</span>
+              <div>
+                <h3>Seuil de cohérence</h3>
+                <p>
+                  Pour que ce vol soit « amorti » de façon raisonnable,
+                  un séjour de <strong>minimum <%= coherence_days %> jours</strong> est recommandé.
+                  Vous avez prévu <%= @trip.duration_days %> jours —
+                  <span style="color: var(--orange);">envisagez de prolonger de <%= coherence_days - @trip.duration_days %> jours.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
       </div>
 
-      <%# ── Sidebar ── %>
-      <div class="country-sidebar">
+      <%# ── SIDEBAR ── %>
+      <div class="trip-result-sidebar">
 
-        <div class="sidebar-card">
-          <h3>Détails du voyage</h3>
-          <div class="trip-details-list">
-            <div class="stat-row">
-              <span>Départ</span>
-              <strong><%= @trip.origin_city || "—" %></strong>
-            </div>
-            <div class="stat-row">
-              <span>Destination</span>
-              <strong><%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %></strong>
-            </div>
-            <div class="stat-row">
-              <span>Transport</span>
-              <strong><%= @trip.transport_mode&.icon %> <%= @trip.transport_mode&.name_fr || @trip.transport_mode&.name %></strong>
-            </div>
-            <div class="stat-row">
-              <span>Durée</span>
-              <strong><%= @trip.duration_days %> jours</strong>
-            </div>
-            <div class="stat-row">
-              <span>Voyageurs</span>
-              <strong><%= @trip.travelers_count || 1 %></strong>
-            </div>
-            <% if @trip.departure_date.present? %>
-              <div class="stat-row">
-                <span>Dates</span>
-                <strong><%= l(@trip.departure_date, format: :short) rescue @trip.departure_date %></strong>
-              </div>
-            <% end %>
+        <div class="sidebar-card trip-share-card trip-reveal">
+          <h3>Partagez votre score</h3>
+          <p>Montrez à vos proches l'impact climatique de ce voyage.</p>
+          <%
+            share_text = "Mon voyage #{@trip.origin_city} → #{@trip.country.name_fr} obtient un #{@trip.grade} (#{@trip.overall_score&.round(0)}/100) sur 1.5° Travel ! 🌍🌡️"
+            share_url = trip_url(@trip)
+          %>
+          <div class="trip-share-buttons">
+            <a href="https://twitter.com/intent/tweet?text=<%= CGI.escape(share_text) %>&url=<%= CGI.escape(share_url) %>" target="_blank" rel="noopener" class="btn btn--share btn--share-x">𝕏 Tweeter</a>
+            <a href="mailto:?subject=<%= CGI.escape("Mon score voyage 1.5° Travel") %>&body=<%= CGI.escape("#{share_text}\n\n#{share_url}") %>" class="btn btn--share btn--share-email">✉️ Email</a>
+            <button onclick="navigator.clipboard.writeText('<%= share_url %>'); this.textContent='✅ Copié !'; setTimeout(() => this.textContent='📋 Copier le lien', 2000);" class="btn btn--share btn--share-copy">📋 Copier le lien</button>
           </div>
         </div>
 
-        <div class="sidebar-card">
-          <h3>Fiche pays</h3>
-          <div class="stat-row">
-            <span>Score climat</span>
-            <strong><%= @trip.country.climate_score %>/100</strong>
+        <div class="sidebar-card trip-reveal">
+          <h3><%= @trip.country.flag_emoji %> <%= @trip.country.name_fr %></h3>
+          <div class="trip-sidebar-country">
+            <div class="trip-sidebar-stat">
+              <span class="grade-badge-sm" style="background-color: <%= @trip.country.grade_color %>;"><%= @trip.country.grade %></span>
+              <span>Score climat : <%= @trip.country.climate_score&.round(0) %>/100</span>
+            </div>
+            <div class="trip-sidebar-stat">
+              <span style="color: <%= @trip.country.cat_color %>;">●</span>
+              <span><%= @trip.country.cat_label %></span>
+            </div>
           </div>
-          <div class="stat-row">
-            <span>Grade</span>
-            <span class="grade-badge-sm" style="background-color: <%= @trip.country.grade_color %>;">
-              <%= @trip.country.grade %>
-            </span>
-          </div>
-          <%= link_to "Voir la fiche complète →", country_path(@trip.country), class: "btn btn--outline btn--full", style: "margin-top: var(--space-md);" %>
+          <%= link_to "Voir la fiche pays →", country_path(@trip.country), class: "trip-sidebar-link" %>
         </div>
 
-        <div class="sidebar-card sidebar-card--cta">
-          <p>Ce n'est pas le résultat espéré ?</p>
-          <%= link_to "Essayer un autre voyage", new_trip_path, class: "btn btn--primary" %>
+        <% if %w[D E].include?(@trip.country.grade) %>
+          <div class="sidebar-card sidebar-card--advocacy trip-reveal">
+            <span class="advocacy-icon">✊</span>
+            <h3>J'aurais aimé venir, mais...</h3>
+            <p>Faites savoir à <%= @trip.country.name_fr %> que sa politique climatique influence vos choix de voyage.</p>
+            <div class="advocacy-actions">
+              <a href="https://twitter.com/intent/tweet?text=<%= CGI.escape("J'aurais aimé visiter #{@trip.country.name_fr} 🇫🇷→#{@trip.country.flag_emoji}, mais sa politique climatique (note #{@trip.country.grade}/E) me fait hésiter. #15DegréTravel #ClimatVoyage") %>" target="_blank" rel="noopener" class="btn btn--advocacy btn--advocacy-twitter">𝕏 Tweeter</a>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="sidebar-card sidebar-card--cta trip-reveal">
+          <p>Essayez une autre destination ou un autre mode de transport !</p>
+          <%= link_to "Nouveau calcul", new_trip_path, class: "btn btn--primary btn--full" %>
+        </div>
+
+        <div class="sidebar-card trip-reveal">
+          <h3>📐 Méthodologie</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-sm);">Score transparent, données sourcées, zéro greenwashing.</p>
+          <%= link_to "Comprendre le scoring →", methodology_path, class: "trip-sidebar-link" %>
         </div>
 
       </div>
     </div>
   </div>
 </section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const overlay = document.getElementById("tripLoadingOverlay");
+  if (!overlay) return;
+  const steps = [
+    document.getElementById("loadingStep1"),
+    document.getElementById("loadingStep2"),
+    document.getElementById("loadingStep3"),
+    document.getElementById("loadingStep4")
+  ];
+  steps.forEach((step, i) => {
+    setTimeout(() => {
+      step.classList.add("trip-loading-step--active");
+      if (i > 0) steps[i - 1].classList.add("trip-loading-step--done");
+    }, i * 550);
+  });
+  setTimeout(() => {
+    overlay.classList.add("trip-loading-overlay--hide");
+    document.querySelectorAll(".trip-reveal").forEach((el, i) => {
+      setTimeout(() => el.classList.add("trip-reveal--visible"), i * 100);
+    });
+  }, 2400);
+  setTimeout(() => overlay.remove(), 3000);
+});
+</script>
