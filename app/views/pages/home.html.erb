@@ -36,7 +36,7 @@
     <h1 class="hero-title">
       Voyagez selon les
       <span class="hero-accent">engagements climatiques</span>
-      des pays.
+      des pays
     </h1>
     <p class="hero-subtitle">
       <strong>Chaque pays est noté sur ses politiques climat réelles.
@@ -54,7 +54,7 @@
 <section class="section section--tight section--map">
   <div class="container">
     <h2 class="section-title">Un score clair</h2>
-    <p class="section-subtitle">De A à E, chaque pays et chaque voyage reçoit une note globale transparente.</p>
+    <p class="section-subtitle">De A à E, chaque pays et chaque voyage reçoivent une note globale transparente.</p>
 
     <div class="grades-display" style="margin-bottom: var(--space-lg);">
       <% Trip::GRADES.each do |letter, info| %>
@@ -497,3 +497,19 @@
   document.addEventListener("turbo:load", initNavbarScroll);
 })();
 </script>
+
+<style>
+  @media (max-width: 768px) {
+    .hero { height: auto !important; min-height: 0 !important; }
+    .hero-container {
+      padding-top: 40px !important;
+      padding-bottom: 12px !important;
+      justify-content: flex-start !important;
+      align-items: center !important;
+      min-height: 0 !important;
+    }
+    .hero-title { margin-top: 0 !important; }
+    .hero-subtitle { margin-bottom: 10px !important; }
+    .hero-actions { margin-bottom: 4px !important; }
+  }
+</style>

@@ -2,7 +2,10 @@
   <div class="navbar-container">
     <div class="navbar-brand">
       <%= link_to root_path, class: "logo" do %>
-        <%= image_tag "logo_navbar.png", alt: "1.5° Travel", class: "logo-img" %>
+        <span class="logo-globe-wrap">
+          <%= image_tag "logo_globe.png", alt: "", class: "logo-globe" %>
+        </span>
+        <%= image_tag "logo_text.png", alt: "1.5° Travel", class: "logo-text" %>
       <% end %>
     </div>
 
@@ -16,7 +19,7 @@
       <%= link_to "Explorer les pays", countries_path, class: "nav-link" %>
       <%= link_to "Évaluer un voyage", new_trip_path, class: "nav-link" %>
       <%= link_to "Méthodologie", methodology_path, class: "nav-link" %>
-      <%= link_to "Pourquoi 1.5° ?", pourquoi_path, class: "nav-link" %>
+      <%= link_to "Pourquoi 1.5°", pourquoi_path, class: "nav-link" %>
       <%= link_to "Carte", carte_path, class: "nav-link" %>
 
       <% if user_signed_in? %>
