@@ -1,5 +1,6 @@
 module CountriesHelper
   COUNTRY_PHOTOS = {
+    # ── Original 29 ──
     "CRI" => "https://images.unsplash.com/photo-1580977276076-ae4b8c219b8e?w=800&h=400&fit=crop",
     "KEN" => "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&h=400&fit=crop",
     "ETH" => "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=400&fit=crop",
@@ -28,7 +29,43 @@ module CountriesHelper
     "THA" => "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800&h=400&fit=crop",
     "GRC" => "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=800&h=400&fit=crop",
     "ARG" => "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=800&h=400&fit=crop",
-    "IDN" => "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&h=400&fit=crop"
+    "IDN" => "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&h=400&fit=crop",
+    "NLD" => "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800&h=400&fit=crop",
+    "NPL" => "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&h=400&fit=crop",
+    "MEX" => "https://images.unsplash.com/photo-1518638150340-f706e86654de?w=800&h=400&fit=crop",
+    "TUR" => "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&h=400&fit=crop",
+    "RUS" => "https://images.unsplash.com/photo-1513326738677-b964603b136d?w=800&h=400&fit=crop",
+    "SAU" => "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=800&h=400&fit=crop",
+    "ARE" => "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=400&fit=crop",
+
+    # ── Nouveaux pays ──
+    "FIN" => "https://images.unsplash.com/photo-1538332576228-eb5b4c4de6f5?w=800&h=400&fit=crop",
+    "CHE" => "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&h=400&fit=crop",
+    "AUT" => "https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&h=400&fit=crop",
+    "BEL" => "https://images.unsplash.com/photo-1491557345352-5929e343eb89?w=800&h=400&fit=crop",
+    "IRL" => "https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?w=800&h=400&fit=crop",
+    "COL" => "https://images.unsplash.com/photo-1535477616691-1f81097c5056?w=800&h=400&fit=crop",
+    "PER" => "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800&h=400&fit=crop",
+    "CZE" => "https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&h=400&fit=crop",
+    "HRV" => "https://images.unsplash.com/photo-1555990538-1a5f780b3478?w=800&h=400&fit=crop",
+    "VNM" => "https://images.unsplash.com/photo-1528127269322-539801943592?w=800&h=400&fit=crop",
+    "EGY" => "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=800&h=400&fit=crop",
+    "TUN" => "https://images.unsplash.com/photo-1565689157206-0fddef7589a2?w=800&h=400&fit=crop",
+    "CUB" => "https://images.unsplash.com/photo-1500759285222-a95626b934cb?w=800&h=400&fit=crop",
+    "KOR" => "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&h=400&fit=crop",
+    "MYS" => "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&h=400&fit=crop",
+    "SGP" => "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&h=400&fit=crop",
+    "KHM" => "https://images.unsplash.com/photo-1551966775-a4ddc8df052b?w=800&h=400&fit=crop",
+    "LKA" => "https://images.unsplash.com/photo-1586613835259-8cb0f5d05e98?w=800&h=400&fit=crop",
+    "IRN" => "https://images.unsplash.com/photo-1565018054866-968e244671af?w=800&h=400&fit=crop",
+    "ISL" => "https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=800&h=400&fit=crop",
+    "DOM" => "https://images.unsplash.com/photo-1580237072617-771c3ecc4a24?w=800&h=400&fit=crop",
+    "TZA" => "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&h=400&fit=crop",
+    "JOR" => "https://images.unsplash.com/photo-1580834341580-8c17a3a630ca?w=800&h=400&fit=crop",
+    "SEN" => "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=400&fit=crop",
+    "HUN" => "https://images.unsplash.com/photo-1551867633-194f125bddfa?w=800&h=400&fit=crop",
+    "ROU" => "https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=800&h=400&fit=crop",
+    "POL" => "https://images.unsplash.com/photo-1519197924294-4ba991a11128?w=800&h=400&fit=crop",
   }.freeze
 
   FALLBACK_PHOTO = "https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&h=400&fit=crop"
