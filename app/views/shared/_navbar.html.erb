@@ -1,4 +1,4 @@
-<nav class="navbar">
+<nav class="navbar" id="mainNavbar">
   <div class="navbar-container">
     <div class="navbar-brand">
       <%= link_to root_path, class: "logo" do %>
@@ -26,7 +26,6 @@
         <%= link_to "Mes voyages", trips_path, class: "nav-link" %>
         <%= link_to "Déconnexion", destroy_user_session_path, data: { turbo_method: :delete }, class: "nav-link nav-link--cta" %>
       <% else %>
-        <%= link_to "Connexion", new_user_session_path, class: "nav-link nav-link--cta" %>
       <% end %>
     </div>
 
@@ -34,6 +33,8 @@
     <div class="navbar-overlay" id="navbar-overlay"></div>
   </div>
 </nav>
+
+
 
 <script>
 (function() {
@@ -44,6 +45,11 @@
     var burger  = document.getElementById("navbar-burger");
     var links   = document.getElementById("navbar-links");
     var overlay = document.getElementById("navbar-overlay");
+    var nav     = document.getElementById("mainNavbar");
+    // Auto-transparent on home page
+    if (document.body.classList.contains("pages") && document.body.classList.contains("home")) {
+      nav.classList.add("navbar--transparent");
+    }
     if (!burger || !links) return;
 
     var fresh = burger.cloneNode(true);
@@ -64,20 +70,23 @@
     }
 
     fresh.addEventListener("click", function() {
-      if (links.classList.contains("is-open")) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
+      links.classList.contains("is-open") ? closeMenu() : openMenu();
     });
 
     if (overlay) overlay.addEventListener("click", closeMenu);
-
     links.querySelectorAll(".nav-link").forEach(function(link) {
       link.addEventListener("click", closeMenu);
     });
-
     closeMenu();
+
+    // Scroll: transparent → solid
+    if (nav && nav.classList.contains("navbar--transparent")) {
+      function onScroll() {
+        nav.classList.toggle("navbar--scrolled", window.scrollY > 80);
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
   });
 })();
 </script>
