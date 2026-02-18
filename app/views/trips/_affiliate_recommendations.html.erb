@@ -1,0 +1,184 @@
+<%# app/views/trips/_affiliate_recommendations.html.erb %>
+<%
+  destination = @trip.country.name_fr
+  origin = @trip.origin_city
+  distance = @trip.distance_km || 0
+  current_grade = @trip.grade
+  grade_color = Trip::GRADES[current_grade][:color]
+
+  booking_url = "https://www.booking.com/searchresults.html?ss=#{CGI.escape(destination)}&nflt=sustainability_facility%3D1&utm_source=1point5travel&utm_medium=affiliate&utm_campaign=eco_stay"
+  trainline_url = "https://www.thetrainline.com/fr/search?origin=#{CGI.escape(origin)}&destination=#{CGI.escape(destination)}&utm_source=1point5travel&utm_medium=affiliate&utm_campaign=trip_result"
+  mollow_url = "https://www.mollow.eu/?utm_source=1point5travel&utm_medium=affiliate&utm_campaign=trip_result"
+
+  climate_score = @trip.climate_country_score || 0
+  transport_score = @trip.transport_score || 0
+  local_score = @trip.local_impact_score || 0
+  w_climate = @trip.climate_weight_used || 30
+  w_transport = @trip.transport_weight_used || 40
+  w_local = @trip.local_impact_weight_used || 30
+  co2_transport = @trip.co2_transport_kg || 0
+  duration = @trip.duration_days || 7
+
+  potential_better = case current_grade
+                     when "E" then "C"
+                     when "D" then "B"
+                     when "C" then "A"
+                     when "B" then "A"
+                     else nil
+                     end
+  better_color = potential_better ? Trip::GRADES[potential_better][:color] : nil
+%>
+
+<%# ═══════════════════════════════════════════
+    BLOC 3 — RÉSERVEZ VOTRE VOYAGE
+    ═══════════════════════════════════════════ %>
+
+<div class="detail-card step-card trip-reveal" data-step="3">
+  <h2>Réservez votre voyage</h2>
+  <p class="block-subtitle">Nos partenaires pour préparer votre <%= origin %> → <%= destination %></p>
+
+  <div class="partner-list">
+    <a href="<%= trainline_url %>" target="_blank" rel="noopener sponsored" class="partner-row">
+      <span class="partner-row-icon">🚄</span>
+      <div class="partner-row-info">
+        <strong>Trainline</strong>
+        <span>Billets de train au meilleur prix</span>
+      </div>
+      <span class="partner-row-arrow">→</span>
+    </a>
+
+    <a href="<%= mollow_url %>" target="_blank" rel="noopener sponsored" class="partner-row">
+      <span class="partner-row-icon">🗺️</span>
+      <div class="partner-row-info">
+        <strong>Mollow</strong>
+        <span>Itinéraires bas carbone en train</span>
+      </div>
+      <span class="partner-row-arrow">→</span>
+    </a>
+
+    <a href="<%= booking_url %>" target="_blank" rel="noopener sponsored" class="partner-row">
+      <span class="partner-row-icon">🌿</span>
+      <div class="partner-row-info">
+        <strong>Booking.com</strong>
+        <span>Hébergements éco-certifiés « Travel Sustainable »</span>
+      </div>
+      <span class="partner-row-arrow">→</span>
+    </a>
+  </div>
+
+  <p class="block-footnote">Liens partenaires · Sans surcoût pour vous</p>
+</div>
+
+<%# ═══════════════════════════════════════════
+    BLOC 4 — AMÉLIOREZ VOTRE SCORE (simulator)
+    ═══════════════════════════════════════════ %>
+
+<div class="detail-card step-card trip-reveal" data-step="4">
+  <h2>Améliorez votre score</h2>
+  <p class="block-subtitle">Changez le mode de transport pour voir comment votre score évolue.</p>
+
+  <div class="sim-current">
+    <span class="sim-current-label">Score actuel</span>
+    <span class="sim-badge" id="simGradeBadge" style="background: <%= grade_color %>;"><%= current_grade %></span>
+    <span class="sim-score" id="simScoreValue" style="color: <%= grade_color %>;"><%= @trip.overall_score&.round(0) %><small>/100</small></span>
+  </div>
+
+  <div class="sim-picker">
+    <span class="sim-picker-label">Mode de transport</span>
+    <div class="sim-modes" id="simModes">
+      <button class="sim-mode-btn" data-co2-per-km="0.006" data-name="Train">
+        <span class="sim-mode-icon">🚄</span><span>Train</span>
+      </button>
+      <button class="sim-mode-btn" data-co2-per-km="0.03" data-name="Bus">
+        <span class="sim-mode-icon">🚌</span><span>Bus</span>
+      </button>
+      <button class="sim-mode-btn" data-co2-per-km="0.12" data-name="Voiture">
+        <span class="sim-mode-icon">🚗</span><span>Voiture</span>
+      </button>
+      <button class="sim-mode-btn" data-co2-per-km="0.255" data-name="Avion">
+        <span class="sim-mode-icon">✈️</span><span>Avion</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="sim-result" id="simResult" style="display: none;">
+    <div class="sim-comparison">
+      <div class="sim-from">
+        <span class="sim-mini-badge" id="simFromBadge" style="background: <%= grade_color %>;"><%= current_grade %></span>
+        <span><%= @trip.overall_score&.round(0) %></span>
+      </div>
+      <span class="sim-arrow">→</span>
+      <div class="sim-to">
+        <span class="sim-mini-badge" id="simToBadge"></span>
+        <span id="simToScore"></span>
+      </div>
+    </div>
+    <p class="sim-result-text" id="simResultText"></p>
+    <div class="sim-actions" id="simResultActions"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  function initSimulator() {
+    var modes = document.getElementById("simModes");
+    if (!modes) return;
+
+    var distKm = <%= distance %>, dur = <%= duration %>;
+    var cS = <%= climate_score %>, lS = <%= local_score %>;
+    var wC = <%= w_climate %> / 100, wT = <%= w_transport %> / 100, wL = <%= w_local %> / 100;
+    var curScore = <%= @trip.overall_score&.round(0) || 0 %>;
+    var co2T = <%= co2_transport %>;
+    var GRADES = { A:{min:80,color:"#2D9D3A"}, B:{min:60,color:"#7BBF2A"}, C:{min:40,color:"#F5C542"}, D:{min:20,color:"#E8822A"}, E:{min:0,color:"#C62828"} };
+
+    function grade(s) { return s>=80?"A":s>=60?"B":s>=40?"C":s>=20?"D":"E"; }
+    function tScore(co2pk) {
+      var co2 = distKm * 2 * co2pk, cpd = co2 / Math.max(dur, 1);
+      return Math.round(Math.max(0, Math.min(100, 100 - ((cpd - 5) / 195) * 100)));
+    }
+
+    var curCo2pk = (co2T / (distKm * 2)).toFixed(4);
+    modes.querySelectorAll(".sim-mode-btn").forEach(function(btn) {
+      if (Math.abs(parseFloat(btn.dataset.co2PerKm) - curCo2pk) < 0.05)
+        btn.classList.add("sim-mode-btn--current");
+    });
+
+    modes.addEventListener("click", function(e) {
+      var btn = e.target.closest(".sim-mode-btn");
+      if (!btn) return;
+      modes.querySelectorAll(".sim-mode-btn").forEach(function(b) { b.classList.remove("sim-mode-btn--active"); });
+      btn.classList.add("sim-mode-btn--active");
+
+      var co2pk = parseFloat(btn.dataset.co2PerKm), name = btn.dataset.name;
+      var nT = tScore(co2pk), nO = Math.round(cS * wC + nT * wT + lS * wL);
+      var nG = grade(nO), nC = GRADES[nG].color, diff = nO - curScore;
+
+      document.getElementById("simResult").style.display = "block";
+      document.getElementById("simToBadge").textContent = nG;
+      document.getElementById("simToBadge").style.background = nC;
+      document.getElementById("simToScore").textContent = nO;
+      document.getElementById("simGradeBadge").textContent = nG;
+      document.getElementById("simGradeBadge").style.background = nC;
+      document.getElementById("simScoreValue").innerHTML = nO + "<small>/100</small>";
+      document.getElementById("simScoreValue").style.color = nC;
+
+      var txt = document.getElementById("simResultText"), acts = document.getElementById("simResultActions");
+      if (diff > 0) {
+        txt.innerHTML = "En " + name.toLowerCase() + ", votre score passe à <strong>" + nO + "/100</strong> (<strong style='color:" + nC + "'>+" + diff + " pts</strong>).";
+        acts.innerHTML = (name === "Train" || name === "Bus") ?
+          '<a href="<%= trainline_url %>" target="_blank" rel="noopener sponsored" class="btn btn--primary btn--full">🚄 Réserver sur Trainline →</a>' +
+          '<a href="<%= mollow_url %>" target="_blank" rel="noopener sponsored" class="sim-link">🗺️ Voir l\'itinéraire sur Mollow →</a>' : "";
+      } else if (diff < 0) {
+        txt.innerHTML = "En " + name.toLowerCase() + ", votre score baisserait à <strong>" + nO + "/100</strong> (<span style='color:#C62828'>" + diff + " pts</span>).";
+        acts.innerHTML = "";
+      } else {
+        txt.innerHTML = "C'est déjà votre mode de transport actuel.";
+        acts.innerHTML = "";
+      }
+    });
+  }
+  document.addEventListener("turbo:load", initSimulator);
+  if (document.readyState !== "loading") initSimulator();
+  else document.addEventListener("DOMContentLoaded", initSimulator);
+})();
+</script>

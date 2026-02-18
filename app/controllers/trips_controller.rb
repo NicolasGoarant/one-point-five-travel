@@ -51,7 +51,7 @@ class TripsController < ApplicationController
     end
 
     if @trip.save
-      redirect_to trip_path(@trip), notice: "Votre score voyage a été calculé !"
+      redirect_to trip_path(@trip)
     else
       load_form_data
       render :new, status: :unprocessable_entity

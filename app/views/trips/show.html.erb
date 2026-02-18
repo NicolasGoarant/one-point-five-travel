@@ -297,7 +297,7 @@
             <div class="co2-equiv-items">
               <span class="co2-equiv">🚗 <%= (@trip.co2_total_kg.to_f / 0.21).round(0) %> km en voiture</span>
               <span class="co2-equiv">🥩 <%= (@trip.co2_total_kg.to_f / 27).round(0) %> repas avec du bœuf</span>
-              <span class="co2-equiv">📱 <%= (@trip.co2_total_kg.to_f / 0.05).round(0) %> h de streaming</span>
+              <span class="co2-equiv">🌳 <%= (@trip.co2_total_kg.to_f / 22).round(0) %> arbres à planter pour compenser</span>
             </div>
           </div>
         </div>
@@ -330,6 +330,9 @@
             </div>
           </div>
         <% end %>
+
+        <%# ── RÉSERVEZ + AMÉLIOREZ VOTRE SCORE ── %>
+        <%= render "trips/affiliate_recommendations" %>
 
         <%# COHERENCE %>
         <% if @trip.transport_mode.name&.include?("plane") && coherence_days && @trip.duration_days && @trip.duration_days < coherence_days %>
@@ -410,27 +413,35 @@
 </section>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const overlay = document.getElementById("tripLoadingOverlay");
-  if (!overlay) return;
-  const steps = [
-    document.getElementById("loadingStep1"),
-    document.getElementById("loadingStep2"),
-    document.getElementById("loadingStep3"),
-    document.getElementById("loadingStep4")
-  ];
-  steps.forEach((step, i) => {
-    setTimeout(() => {
-      step.classList.add("trip-loading-step--active");
-      if (i > 0) steps[i - 1].classList.add("trip-loading-step--done");
-    }, i * 1000);
-  });
-  setTimeout(() => {
-    overlay.classList.add("trip-loading-overlay--hide");
-    document.querySelectorAll(".trip-reveal").forEach((el, i) => {
-      setTimeout(() => el.classList.add("trip-reveal--visible"), i * 100);
+(function() {
+  function initTripLoading() {
+    const overlay = document.getElementById("tripLoadingOverlay");
+    if (!overlay) return;
+    const steps = [
+      document.getElementById("loadingStep1"),
+      document.getElementById("loadingStep2"),
+      document.getElementById("loadingStep3"),
+      document.getElementById("loadingStep4")
+    ];
+    steps.forEach((step, i) => {
+      setTimeout(() => {
+        step.classList.add("trip-loading-step--active");
+        if (i > 0) steps[i - 1].classList.add("trip-loading-step--done");
+      }, i * 1000);
     });
-  }, 4500);
-  setTimeout(() => overlay.remove(), 5200);
-});
+    setTimeout(() => {
+      overlay.classList.add("trip-loading-overlay--hide");
+      document.querySelectorAll(".trip-reveal").forEach((el, i) => {
+        setTimeout(() => el.classList.add("trip-reveal--visible"), i * 100);
+      });
+    }, 4500);
+    setTimeout(() => overlay.remove(), 5200);
+  }
+  document.addEventListener("turbo:load", initTripLoading);
+  if (document.readyState !== "loading") {
+    initTripLoading();
+  } else {
+    document.addEventListener("DOMContentLoaded", initTripLoading);
+  }
+})();
 </script>
