@@ -1,10 +1,8 @@
 class Country < ApplicationRecord
   has_many :destinations, dependent: :destroy
   has_many :trips, dependent: :nullify
-
   validates :name, :name_fr, :iso_code, presence: true
   validates :iso_code, uniqueness: true, length: { is: 3 }
-
   scope :ranked_by_climate, -> { where.not(climate_score: nil).order(climate_score: :desc) }
   scope :paris_compatible, -> { where(cat_rating: %w[1.5c_compatible almost_sufficient]) }
   scope :by_continent, ->(continent) { where(continent: continent) }
@@ -18,6 +16,44 @@ class Country < ApplicationRecord
   }.freeze
 
   CONTINENTS = %w[Europe Asie Afrique Amérique_du_Nord Amérique_du_Sud Océanie].freeze
+
+  # Pays sans article (îles, cités-États, exceptions)
+  SANS_ARTICLE = %w[
+    Cuba Israël Madagascar Malte Monaco Singapour Chypre Bahreïn
+    Djibouti Haïti Oman Taïwan Nauru Tuvalu Vanuatu Fidji
+  ].freeze
+
+  # Pays pluriels → "les"
+  PLURIELS = [
+    "États-Unis", "Pays-Bas", "Philippines", "Émirats arabes unis",
+    "Comores", "Maldives", "Seychelles", "Îles Marshall", "Îles Salomon",
+    "Tonga", "Bahamas"
+  ].freeze
+
+  # Pays masculins malgré le "e" final
+  MASCULINS_EN_E = %w[
+    Mexique Mozambique Cambodge Zimbabwe Belize Suriname
+  ].freeze
+
+  # ── Nom avec article défini (pour les phrases) ──
+  # "la France", "le Costa Rica", "l'Allemagne", "les États-Unis"
+  def name_with_article
+    return name_fr if SANS_ARTICLE.include?(name_fr)
+    return "les #{name_fr}" if PLURIELS.include?(name_fr)
+
+    if name_fr.match?(/\A[AEIOUÉÈÊËÎÏÔÛÜÂÀaeiou]/i)
+      "l'#{name_fr}"
+    elsif name_fr.end_with?("e") && !MASCULINS_EN_E.include?(name_fr)
+      "la #{name_fr}"
+    else
+      "le #{name_fr}"
+    end
+  end
+
+  # Variante capitalisée pour début de phrase : "La France", "Le Costa Rica"
+  def name_with_article_cap
+    name_with_article.sub(/\A(l'|le |la |les )/) { |m| m == "l'" ? "L'" : m.capitalize }
+  end
 
   def compute_climate_score!
     scores = []

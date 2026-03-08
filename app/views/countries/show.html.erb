@@ -27,15 +27,15 @@
           <%# Phrase d'accroche selon le grade %>
           <% case @country.grade
              when "A" %>
-            <strong><%= @country.name_fr %></strong> fait partie des pays les plus engagés dans la lutte contre le changement climatique.
+            <strong><%= @country.name_with_article_cap %></strong> fait partie des pays les plus engagés dans la lutte contre le changement climatique.
           <% when "B" %>
-            <strong><%= @country.name_fr %></strong> affiche des engagements climatiques encourageants, bien que des progrès restent à faire.
+            <strong><%= @country.name_with_article_cap %></strong> affiche des engagements climatiques encourageants, bien que des progrès restent à faire.
           <% when "C" %>
-            <strong><%= @country.name_fr %></strong> présente un bilan climatique mitigé, avec des politiques en deçà de l'objectif 1.5°C.
+            <strong><%= @country.name_with_article_cap %></strong> présente un bilan climatique mitigé, avec des politiques en deçà de l'objectif 1.5°C.
           <% when "D" %>
-            <strong><%= @country.name_fr %></strong> accuse un retard significatif sur ses engagements climatiques.
+            <strong><%= @country.name_with_article_cap %></strong> accuse un retard significatif sur ses engagements climatiques.
           <% else %>
-            <strong><%= @country.name_fr %></strong> ne respecte pas les objectifs de l'Accord de Paris.
+            <strong><%= @country.name_with_article_cap %></strong> ne respecte pas les objectifs de l'Accord de Paris.
           <% end %>
 
           <%# Évaluation CAT %>
@@ -152,7 +152,7 @@
 
         <%# CTA %>
         <div class="sidebar-card sidebar-card--cta">
-          <p>Calculez l'empreinte d'un voyage vers <%= @country.name_fr %></p>
+          <p>Calculez l'empreinte d'un voyage vers <%= @country.name_with_article %></p>
           <%= link_to "Évaluer un voyage", new_trip_path(country_id: @country.id), class: "btn btn--primary btn--full" %>
         </div>
 
@@ -188,15 +188,15 @@
             <span class="advocacy-icon">✉️</span>
             <h3>J'aurais aimé venir, mais...</h3>
             <p>
-              Dites au <%= @country.name_fr %> pourquoi vous n'avez pas choisi cette destination.
+              Dites à <%= @country.name_with_article %> pourquoi vous n'avez pas choisi cette destination.
               Votre voix compte pour faire avancer les politiques climatiques.
             </p>
             <div class="advocacy-actions">
               <%
-                tweet_text = "J'aurais aimé visiter #{@country.name_fr}, mais son bilan climatique (note #{@country.grade}, #{@country.climate_score&.round(0)}/100) m'en empêche. J'attends des engagements climatiques plus ambitieux. #15DegTravel #ClimateTourism"
+                tweet_text = "J'aurais aimé visiter #{@country.name_with_article}, mais son bilan climatique (note #{@country.grade}, #{@country.climate_score&.round(0)}/100) m'en empêche. J'attends des engagements climatiques plus ambitieux. #15DegTravel #ClimateTourism"
                 tweet_url = "https://twitter.com/intent/tweet?text=#{ERB::Util.url_encode(tweet_text)}"
-                email_subject = "Touriste engagé : pourquoi je n'ai pas choisi #{@country.name_fr}"
-                email_body = "Madame, Monsieur le Ministre,\n\nEn tant que voyageur soucieux de l'environnement, j'aurais aimé visiter #{@country.name_fr}. Cependant, le bilan climatique de votre pays (note #{@country.grade} sur l'échelle 1.5° Travel, #{@country.climate_score&.round(0)}/100) m'a conduit à choisir une autre destination.\n\nJe vous encourage à renforcer les engagements climatiques de #{@country.name_fr} pour attirer les voyageurs responsables de demain.\n\nCordialement"
+                email_subject = "Touriste engagé : pourquoi je n'ai pas choisi #{@country.name_with_article}"
+                email_body = "Madame, Monsieur le Ministre,\n\nEn tant que voyageur soucieux de l'environnement, j'aurais aimé visiter #{@country.name_with_article}. Cependant, le bilan climatique de votre pays (note #{@country.grade} sur l'échelle 1.5° Travel, #{@country.climate_score&.round(0)}/100) m'a conduit à choisir une autre destination.\n\nJe vous encourage à renforcer les engagements climatiques pour attirer les voyageurs responsables de demain.\n\nCordialement"
                 email_url = "mailto:?subject=#{ERB::Util.url_encode(email_subject)}&body=#{ERB::Util.url_encode(email_body)}"
               %>
               <a href="<%= tweet_url %>" target="_blank" rel="noopener" class="btn btn--advocacy btn--advocacy-twitter">
