@@ -67,7 +67,7 @@ gem "country_select", "~> 11.0"
 
 gem "rspec-rails", "~> 8.0", groups: [:development, :test]
 gem "factory_bot_rails", "~> 6.5", groups: [:development, :test]
-gem "faker", "~> 3.6", groups: [:development, :test]
+gem "faker", "~> 3.7", groups: [:development, :test]
 
 gem "letter_opener", "~> 1.10", group: :development
 gem "annotate", "~> 3.2", group: :development
