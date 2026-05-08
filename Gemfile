@@ -56,7 +56,7 @@ group :test do
 end
 
 gem "devise", "~> 5.0"
-gem "friendly_id", "~> 5.6"
+gem "friendly_id", "~> 5.7"
 gem "geocoder", "~> 1.8"
 gem "chartkick", "~> 5.2"
 gem "groupdate", "~> 6.7"
